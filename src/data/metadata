@@ -16,3 +16,4 @@ homepage=https://aksommerville.itch.io/vexularg
 source=https://github.com/aksommerville/vexularg
 incfgMask=ds
 incfgNames=3
+menu=none

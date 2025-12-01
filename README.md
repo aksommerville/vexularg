@@ -9,4 +9,19 @@ To do so, they'll need to gather a suitable offering.
 Metroidvaniy fetch quest. Explore, find things, bring them back to the altar.
 Time limit.
 
+Pick things up with B, a la Sitter.
+Include offerable items that also do things: trampoline, magnet, fan.
+Maybe a TV to distract the murderous bat?
+Make a murderous bat.
 
+I'm thinking one giant map.
+
+Don't generalize sprite groups like I did for Queen of Clocks, it's overkill.
+Single list of live sprites, which we'll iterate the whole thing a lot. It's OK. Chill.
+
+## TODO
+
+- [x] Make the universal menu disablable, and disable it. We can't control its use of color.
+- [ ] Map loader.
+- [ ] Sprite loader.
+- [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
