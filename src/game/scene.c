@@ -10,7 +10,22 @@ int scene_reset() {
 
   //TODO Drop sprites.
   
-  //TODO Run thru map poi eg for sprites.
+  /* Run map commands.
+   */
+  struct cmdlist_reader reader={.v=g.mapcmd,.c=g.mapcmdc};
+  struct cmdlist_entry cmd;
+  while (cmdlist_reader_next(&cmd,&reader)>0) {
+    switch (cmd.opcode) {
+      case CMD_map_sprite: {
+          double x=cmd.arg[0]+0.5;
+          double y=cmd.arg[1]+0.5;
+          int rid=(cmd.arg[2]<<8)|cmd.arg[3];
+          uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
+          struct sprite *sprite=sprite_spawn(0,x,y,arg,rid,0,0);
+        } break;
+      //TODO Other map initialization commands.
+    }
+  }
   
   //TODO Restart music.
   
@@ -32,34 +47,41 @@ void scene_render() {
   /* Determine camera position.
    * Center on the hero, and clamp to the world.
    * World is guaranteed to be at least the size of the framebuffer.
+   * TODO I'm thinking about camera-override zones, in particular when you're near the altar I'd like it to focus the altar room rather than the hero.
    */
-  double focusx,focusy;
-  focusx=g.mapw*0.5;//TODO Hero position. And maybe other adjustments?
-  focusy=g.maph*0.5;
-  int worldw=g.mapw*NS_sys_tilesize;
-  int worldh=g.maph*NS_sys_tilesize;
-  int camerax=(int)(focusx*NS_sys_tilesize)-(FBW>>1);
-  int cameray=(int)(focusy*NS_sys_tilesize)-(FBH>>1);
-  if (camerax<0) camerax=0;
-  else if (camerax>worldw-FBW) camerax=worldw-FBW;
-  if (cameray<0) cameray=0;
-  else if (cameray>worldh-FBH) cameray=worldh-FBH;
+  if (g.hero) {
+    double focusx,focusy;
+    focusx=g.hero->x;
+    focusy=g.hero->y;
+    int worldw=g.mapw*NS_sys_tilesize;
+    int worldh=g.maph*NS_sys_tilesize;
+    int camerax=(int)(focusx*NS_sys_tilesize)-(FBW>>1);
+    int cameray=(int)(focusy*NS_sys_tilesize)-(FBH>>1);
+    if (camerax<0) camerax=0;
+    else if (camerax>worldw-FBW) camerax=worldw-FBW;
+    if (cameray<0) cameray=0;
+    else if (cameray>worldh-FBH) cameray=worldh-FBH;
+    g.camerax=camerax; // Opportunity here for drunken camera, but I generally don't like those effects.
+    g.cameray=cameray;
+  }
 
   //TODO I'd like to make some terrain tiles transparent and draw animated parallax layers behind. Decorative, not urgent.
   // For now, we may assume that the terrain tiles are opaque.
   
-  int cola=camerax/NS_sys_tilesize;
-  int colz=(camerax+FBW-1)/NS_sys_tilesize;
-  int rowa=cameray/NS_sys_tilesize;
-  int rowz=(cameray+FBH-1)/NS_sys_tilesize;
+  /* Fill framebuffer with the grid.
+   */
+  int cola=g.camerax/NS_sys_tilesize;
+  int colz=(g.camerax+FBW-1)/NS_sys_tilesize;
+  int rowa=g.cameray/NS_sys_tilesize;
+  int rowz=(g.cameray+FBH-1)/NS_sys_tilesize;
   if (cola<0) cola=0;
   if (colz>=g.mapw) colz=g.mapw-1;
   if (rowa<0) rowa=0;
   if (rowz>=g.maph) rowz=g.maph-1;
   if ((cola<=colz)&&(rowa<=rowz)) {
     graf_set_input(&g.graf,g.texid_terrain);
-    int dsty=rowa*NS_sys_tilesize+(NS_sys_tilesize>>1)-cameray;
-    int dstx0=cola*NS_sys_tilesize+(NS_sys_tilesize>>1)-camerax;
+    int dsty=rowa*NS_sys_tilesize+(NS_sys_tilesize>>1)-g.cameray;
+    int dstx0=cola*NS_sys_tilesize+(NS_sys_tilesize>>1)-g.camerax;
     const uint8_t *cellrow=g.cellv+rowa*g.mapw+cola;
     int row=rowa;
     for (;row<=rowz;row++,cellrow+=g.mapw,dsty+=NS_sys_tilesize) {
@@ -72,7 +94,32 @@ void scene_render() {
     }
   }
   
-  //TODO Sprites.
+  /* Sprites.
+   * We're doing a large single map with one set of sprites distributed about it.
+   * It's worth a little effort to cull sprite well offscreen.
+   * Assume that no sprite is wider than 2 meters.
+   */
+  double viewl=(double)(g.camerax-NS_sys_tilesize)/(double)NS_sys_tilesize;
+  double viewt=(double)(g.cameray-NS_sys_tilesize)/(double)NS_sys_tilesize;
+  double viewr=(double)(g.camerax+FBW+NS_sys_tilesize)/(double)NS_sys_tilesize;
+  double viewb=(double)(g.cameray+FBH+NS_sys_tilesize)/(double)NS_sys_tilesize;
+  graf_set_input(&g.graf,g.texid_sprites);
+  struct sprite **p=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (sprite->x<viewl) continue;
+    if (sprite->x>viewr) continue;
+    if (sprite->y<viewt) continue;
+    if (sprite->y>viewb) continue;
+    int dstx=(int)(sprite->x*NS_sys_tilesize)-g.camerax;
+    int dsty=(int)(sprite->y*NS_sys_tilesize)-g.cameray;
+    if (sprite->type->render) {
+      sprite->type->render(sprite,dstx,dsty);
+    } else {
+      graf_tile(&g.graf,dstx,dsty,sprite->tileid,sprite->xform);
+    }
+  }
   
   //TODO Overlay.
 }

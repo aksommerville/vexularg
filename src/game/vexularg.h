@@ -8,6 +8,7 @@
 #include "util/res/res.h"
 #include "egg_res_toc.h"
 #include "shared_symbols.h"
+#include "sprite/sprite.h"
 
 #define FBW 160
 #define FBH 88
@@ -30,10 +31,14 @@ extern struct g {
   
   const uint8_t *cellv;
   int mapw,maph; // Dimensions are not fixed at build time, tho they could be. Treat them as dynamic.
-  //TODO Capture any other map POI that we'll need ongoing.
+  const uint8_t *mapcmd;
+  int mapcmdc;
   uint8_t physics[256]; // Single tilesheet, we load it just once.
+  int camerax,cameray;
   
-  //TODO Sprites.
+  struct sprite **spritev;
+  int spritec,spritea;
+  struct sprite *hero; // WEAK, OPTIONAL. Maintained sneakily by generic sprite allocator.
 } g;
 
 int res_init();

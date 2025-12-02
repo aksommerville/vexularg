@@ -1,0 +1,4 @@
+type (u16:sprtype)moon
+solid
+image image:sprites
+tile 0 1

@@ -25,7 +25,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 
 - [x] Make the universal menu disablable, and disable it. We can't control its use of color.
 - [x] Map loader.
-- [ ] Sprite loader.
+- [x] Sprite loader.
 - [ ] Hero sprite. Motion etc.
 - [ ] Carry things.
 - [ ] Active things.

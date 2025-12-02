@@ -23,11 +23,13 @@ static int res_welcome_map(const void *src,int srcc) {
   g.cellv=rmap.v;
   g.mapw=rmap.w;
   g.maph=rmap.h;
+  g.mapcmd=rmap.cmd;
+  g.mapcmdc=rmap.cmdc;
   struct cmdlist_reader reader={.v=rmap.cmd,.c=rmap.cmdc};
   struct cmdlist_entry cmd;
   while (cmdlist_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
-      //TODO Process map commands.
+      //TODO Process one-time map commands, eg capture POI that need realtime access.
     }
   }
   return 0;
@@ -70,7 +72,19 @@ int res_init() {
   if (rom_reader_init(&reader,g.rom,g.romc)<0) return -1;
   struct rom_entry res;
   while (rom_reader_next(&res,&reader)>0) {
-    if (res_welcome(&res)<0) return -1;
+    int err=res_welcome(&res);
+    if (err<0) return -1;
+    if (err>0) { // Record in TOC.
+      if (g.resc>=g.resa) {
+        int na=g.resa+32;
+        if (na>INT_MAX/sizeof(struct rom_entry)) return -1;
+        void *nv=realloc(g.resv,sizeof(struct rom_entry)*na);
+        if (!nv) return -1;
+        g.resv=nv;
+        g.resa=na;
+      }
+      g.resv[g.resc++]=res;
+    }
   }
   
   if (!g.cellv||(g.mapw<1)||(g.maph<1)) {
