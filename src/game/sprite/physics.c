@@ -9,6 +9,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
 
   // Get out fast for invalid requests, eg not solid.
   if (!sprite) return 0;
+  sprite->collcause=0;
   if (!sprite->solid) {
     sprite->x+=dx;
     sprite->y+=dy;
@@ -101,6 +102,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
     if (other->y+0.5<=st) continue;
     
     // Sprites collide. Back off.
+    sprite->collcause=other;
     switch (dir) {
       case 0x40: ny=other->y+1.0; REFRESH_BOUNDS; break;
       case 0x10: nx=other->x+1.0; REFRESH_BOUNDS; break;

@@ -51,12 +51,17 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
       
     // Balloon diminishes gravity and enhances jump -- hero takes care of that. When left alone, we slowly rise.
     case NS_role_balloon: if (!SPRITE->carried) {
-        //TODO float
+        sprite_move(sprite,0.0,-1.500*elapsed);
       } break;
     
     // Trampoline makes the hero bounce when she lands on us -- hero takes care of that. But we need to animate the interaction.
     case NS_role_trampoline: {
-        //TODO bounce animation
+        if (SPRITE->animclock>0.0) {
+          SPRITE->animclock-=elapsed;
+          sprite->tileid=SPRITE->tileid0+(((int)(SPRITE->animclock*8.0))&1);
+        } else {
+          sprite->tileid=SPRITE->tileid0;
+        }
       } break;
   }
   
@@ -96,12 +101,25 @@ const struct sprite_type sprite_type_thing={
   .update=_thing_update,
 };
 
+/* Trivial accessors.
+ */
+ 
+int sprite_thing_get_role(const struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_thing)) return NS_role_inert;
+  return SPRITE->role;
+}
+
+void sprite_thing_animate_trampoline(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_thing)) return;
+  if (SPRITE->role!=NS_role_trampoline) return;
+  SPRITE->animclock=1.0;
+}
+
 /* Get carried.
  */
  
 int sprite_thing_get_carried(struct sprite *sprite,struct sprite *hero) {
   if (!sprite||(sprite->type!=&sprite_type_thing)) return 0;
-  //TODO
   SPRITE->carried=1;
   SPRITE->same_direction=((sprite->xform&EGG_XFORM_XREV)==(hero->xform&EGG_XFORM_XREV));
   sprite->solid=0;
@@ -119,7 +137,18 @@ int sprite_thing_get_dropped(struct sprite *sprite,struct sprite *hero) {
   /* If we really wanted to get slick about it, in collision cases we should try nearby position, and maybe shuffle the hero.
    * Instead we just reject the drop if we're overlapping something.
    */
-  if (sprite_collides_anything(sprite)) return 0;
+  if (g.input&EGG_BTN_DOWN) {
+    double hy0=hero->y;
+    hero->y-=1.0;
+    if (sprite_collides_anything(hero)) {
+      hero->y=hy0;
+      return 0;
+    }
+    sprite->x=hero->x;
+    sprite->y=hy0;
+  } else {
+    if (sprite_collides_anything(sprite)) return 0;
+  }
   SPRITE->carried=0;
   sprite->solid=1;
   return 1;

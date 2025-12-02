@@ -63,6 +63,6 @@ sprite @11,53 sprite:fish (u32)0
 sprite @28,53 sprite:tomato (u32)0
 sprite @63,53 sprite:trampoline (u32)0
 sprite @51,53 sprite:magnet (u32)0
-sprite @92,53 sprite:balloon (u32)0
+sprite @66,50 sprite:balloon (u32)0
 sprite @10,4 sprite:teacup (u32)0
 sprite @44,20 sprite:fan (u32)0

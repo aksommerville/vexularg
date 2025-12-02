@@ -7,6 +7,13 @@
 #define GRAVITY_INITIAL   1.000 /* m/s */
 #define GRAVITY_MAX      20.000 /* m/s */
 #define GRAVITY_ACCEL    50.000 /* m/s**2 */
+#define GRAVITY_MAX_BALLOON    5.000
+#define GRAVITY_ACCEL_BALLOON 30.000
+#define JUMP_TIME_BALLOON      0.750
+#define TRAMPOLINE_MIN     5.000 /* m/s */
+#define TRAMPOLINE_RATE    2.000 /* m/s per meter of fall before */
+#define TRAMPOLINE_AUGMENT 2.000 /* Multiplier, if you're holding jump. */
+#define JUMP_LIMIT        30.000 /* m/s, maximum initial jump rate off trampoline. */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -17,9 +24,11 @@ struct sprite_hero {
   double jumpclock;
   double jumppower; // Only relevant while (falling<0). NB: Positive always.
   int jump_blackout; // Must release button before starting another jump.
+  int trampoline; // If nonzero, jump is not cancellable.
   double gravity; // Only relevant while (falling>0).
   double gravity_y0; // Position at start of falling, so we can compute final force.
   struct sprite *pumpkin; // STRONG and unlisted, if not null.
+  int pumpkin_role;
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -48,6 +57,7 @@ static void hero_pickup_or_drop(struct sprite *sprite) {
     if (sprite_thing_get_dropped(SPRITE->pumpkin,sprite)) {
       sprite_list(SPRITE->pumpkin);
       SPRITE->pumpkin=0;
+      SPRITE->pumpkin_role=NS_role_inert;
       sfx_spatial(RID_sound_drop,sprite->x,sprite->y);
     } else {
       sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
@@ -56,7 +66,9 @@ static void hero_pickup_or_drop(struct sprite *sprite) {
   }
   double fx=sprite->x;
   double fy=sprite->y;
-  if (sprite->xform) fx-=1.0; else fx+=1.0;
+  if (g.input&EGG_BTN_DOWN) fy+=1.0;
+  else if (sprite->xform) fx-=1.0;
+  else fx+=1.0;
   struct sprite **otherp=g.spritev;
   int i=g.spritec;
   for (;i-->0;otherp++) {
@@ -71,6 +83,7 @@ static void hero_pickup_or_drop(struct sprite *sprite) {
     if (!sprite_thing_get_carried(other,sprite)) continue;
     other->unlist_soon=1;
     SPRITE->pumpkin=other;
+    SPRITE->pumpkin_role=sprite_thing_get_role(other);
     sfx_spatial(RID_sound_pickup,sprite->x,sprite->y);
     return;
   }
@@ -135,7 +148,7 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
   /* Advance jump or gravity.
    */
   if (SPRITE->falling<0) {
-    if (!(g.input&EGG_BTN_SOUTH)) { // Abort jump.
+    if (!(g.input&EGG_BTN_SOUTH)&&!SPRITE->trampoline) { // Abort jump.
       SPRITE->falling=1;
       SPRITE->gravity=GRAVITY_INITIAL;
       SPRITE->gravity_y0=sprite->y;
@@ -143,21 +156,42 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->falling=1;
       SPRITE->gravity=GRAVITY_INITIAL;
       SPRITE->gravity_y0=sprite->y;
+      SPRITE->trampoline=0;
     } else { // Continue jumping.
       SPRITE->jumppower-=elapsed*JUMP_DECEL;
       sprite_move(sprite,0.0,-SPRITE->jumppower*elapsed);
     }
   } else if (SPRITE->falling>0) {
-    SPRITE->gravity+=GRAVITY_ACCEL*elapsed;
-    if (SPRITE->gravity>GRAVITY_MAX) SPRITE->gravity=GRAVITY_MAX;
+    if (SPRITE->pumpkin_role==NS_role_balloon) {
+      SPRITE->gravity+=GRAVITY_ACCEL_BALLOON*elapsed;
+      if (SPRITE->gravity>GRAVITY_MAX_BALLOON) SPRITE->gravity=GRAVITY_MAX_BALLOON;
+    } else {
+      SPRITE->gravity+=GRAVITY_ACCEL*elapsed;
+      if (SPRITE->gravity>GRAVITY_MAX) SPRITE->gravity=GRAVITY_MAX;
+    }
     if (!sprite_move(sprite,0.0,SPRITE->gravity*elapsed)) { // Hit ground.
       // A full jump is about 4.7 m. Terminal velocity somewhere around 4.
+      SPRITE->falling=0;
       double distance=sprite->y-SPRITE->gravity_y0;
-      if (distance<0.125) ; // Nothing for very short drops, might not be a real fall.
+      if (sprite_thing_get_role(sprite->collcause)==NS_role_trampoline) {
+        SPRITE->jumppower=TRAMPOLINE_MIN+TRAMPOLINE_RATE*distance;
+        if (g.input&EGG_BTN_SOUTH) { // Hit trampoline while jumping: multiply force.
+          SPRITE->jumppower*=TRAMPOLINE_AUGMENT;
+        }
+        if (SPRITE->jumppower>JUMP_LIMIT) {
+          SPRITE->jumppower=JUMP_LIMIT;
+        }
+        if (SPRITE->jumppower>=1.0) sfx_spatial(RID_sound_trampoline_big,sprite->collcause->x,sprite->collcause->y);
+        else sfx_spatial(RID_sound_trampoline_lil,sprite->collcause->x,sprite->collcause->y);
+        sprite_thing_animate_trampoline(sprite->collcause);
+        SPRITE->falling=-1;
+        SPRITE->jumpclock=JUMP_TIME;
+        SPRITE->jump_blackout=1;
+        SPRITE->trampoline=1;
+      } else if ((distance<0.125)||(SPRITE->pumpkin_role==NS_role_balloon)) ; // Nothing for very short drops, might not be a real fall.
       else if (distance<2.0) hero_land_softly(sprite);
       else if (distance<6.0) hero_land_mediumly(sprite);
       else hero_land_roughly(sprite);
-      SPRITE->falling=0;
     }
   } else { // Grounded, but verify.
     if (sprite_move(sprite,0.0,GRAVITY_INITIAL*elapsed)) { // Begin falling.
@@ -183,7 +217,11 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->falling=-1;
       SPRITE->jump_blackout=1;
       SPRITE->jumppower=JUMP_INITIAL;
-      SPRITE->jumpclock=JUMP_TIME;
+      if (SPRITE->pumpkin_role==NS_role_balloon) {
+        SPRITE->jumpclock=JUMP_TIME_BALLOON;
+      } else {
+        SPRITE->jumpclock=JUMP_TIME;
+      }
     }
   }
   

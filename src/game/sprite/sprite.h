@@ -35,6 +35,7 @@ struct sprite {
   const void *cmd; // Entire sprite resource, including signature.
   int cmdc;
   int solid;
+  struct sprite *collcause; // WEAK. After a move returns zero, if caused by another sprite, we disclose it here.
   int layer; // Render order low to high. Hero is at 100, and that is the default.
 };
 
@@ -80,6 +81,8 @@ const struct sprite_type *sprite_type_from_id(int id);
 
 int sprite_thing_get_carried(struct sprite *sprite,struct sprite *hero);
 int sprite_thing_get_dropped(struct sprite *sprite,struct sprite *hero);
+int sprite_thing_get_role(const struct sprite *sprite);
+void sprite_thing_animate_trampoline(struct sprite *sprite);
 
 /* Physics.
  ***************************************************************/

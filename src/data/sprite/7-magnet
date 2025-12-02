@@ -1,5 +1,5 @@
 image image:sprites
-tile 84 0
+tile 0x57 0
 type (u16:sprtype)thing
 solid
 role (u16:role)magnet
