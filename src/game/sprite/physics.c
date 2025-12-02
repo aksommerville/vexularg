@@ -87,7 +87,27 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
   
   /* Check for collisions against other solid sprites.
    */
-  //TODO
+  struct sprite **otherp=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (!other->solid) continue;
+    if (other->defunct) continue;
+    if (other==sprite) continue;
+    
+    if (other->x-0.5>=sr) continue;
+    if (other->x+0.5<=sl) continue;
+    if (other->y-0.5>=sb) continue;
+    if (other->y+0.5<=st) continue;
+    
+    // Sprites collide. Back off.
+    switch (dir) {
+      case 0x40: ny=other->y+1.0; REFRESH_BOUNDS; break;
+      case 0x10: nx=other->x+1.0; REFRESH_BOUNDS; break;
+      case 0x08: nx=other->x-1.0; REFRESH_BOUNDS; break;
+      case 0x02: ny=other->y-1.0; REFRESH_BOUNDS; break;
+    }
+  }
   
   /* OK, let's keep the new position.
    */

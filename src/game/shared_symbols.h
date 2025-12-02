@@ -21,6 +21,7 @@
 #define CMD_sprite_tile  0x21 /* u8:tileid, u8:xform */
 #define CMD_sprite_type  0x22 /* u16:sprtype */
 #define CMD_sprite_layer 0x23 /* u16:layer(default 100) */
+#define CMD_sprite_role  0x24 /* u16:role ; for thing */
 
 #define NS_tilesheet_physics 1
 #define NS_tilesheet_family 0
@@ -43,7 +44,7 @@
 #define NS_sprtype_dummy 0 /* (u32)0 */
 #define NS_sprtype_hero 1 /* (u32)0 */
 #define NS_sprtype_moon 2 /* (u32)0 */
-#define NS_sprtype_thing 3 /* (u8:role)inert 0x000000 */
+#define NS_sprtype_thing 3 /* (u32)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \

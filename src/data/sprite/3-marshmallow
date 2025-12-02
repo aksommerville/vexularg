@@ -1,0 +1,5 @@
+type (u16:sprtype)thing
+image image:sprites
+tile 68 0
+solid
+role (u16:role)inert
