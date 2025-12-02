@@ -35,6 +35,8 @@ int scene_reset() {
   // Restart music.
   song(RID_song_unto_thee);
   
+  g.camera_cut=1;
+  
   return 0;
 }
 
@@ -106,12 +108,24 @@ void scene_render() {
   /* Determine camera position.
    * Center on the hero, and clamp to the world.
    * World is guaranteed to be at least the size of the framebuffer.
-   * TODO I'm thinking about camera-override zones, in particular when you're near the altar I'd like it to focus the altar room rather than the hero.
    */
   if (g.hero) {
     double focusx,focusy;
     focusx=g.hero->x;
     focusy=g.hero->y;
+    int fqx=(int)focusx,fqy=(int)focusy,locked=0;
+    const struct camlock *camlock=g.camlockv;
+    int i=g.camlockc;
+    for (;i-->0;camlock++) {
+      if (fqx<camlock->x) continue;
+      if (fqy<camlock->y) continue;
+      if (fqx>=camlock->x+camlock->w) continue;
+      if (fqy>=camlock->y+camlock->h) continue;
+      focusx=(double)camlock->x+(double)camlock->w*0.5;
+      focusy=(double)camlock->y+(double)camlock->h*0.5;
+      locked=1;
+      break;
+    }
     int worldw=g.mapw*NS_sys_tilesize;
     int worldh=g.maph*NS_sys_tilesize;
     int camerax=(int)(focusx*NS_sys_tilesize)-(FBW>>1);
@@ -120,8 +134,23 @@ void scene_render() {
     else if (camerax>worldw-FBW) camerax=worldw-FBW;
     if (cameray<0) cameray=0;
     else if (cameray>worldh-FBH) cameray=worldh-FBH;
-    g.camerax=camerax; // Opportunity here for drunken camera, but I generally don't like those effects.
-    g.cameray=cameray;
+    if (g.camera_cut) { // Cut? Jump immediately to the new target.
+      g.camera_cut=0;
+      g.camerax=camerax;
+      g.cameray=cameray;
+    } else { // No cut? step by no more than some limit.
+      const int maxstep=3; // 3 stays synced always. 2 is pretty good, but can fall behind at high gravity.
+      if (g.camerax<camerax) {
+        if ((g.camerax+=maxstep)>camerax) g.camerax=camerax;
+      } else if (g.camerax>camerax) {
+        if ((g.camerax-=maxstep)<camerax) g.camerax=camerax;
+      }
+      if (g.cameray<cameray) {
+        if ((g.cameray+=maxstep)>cameray) g.cameray=cameray;
+      } else if (g.cameray>cameray) {
+        if ((g.cameray-=maxstep)<cameray) g.cameray=cameray;
+      }
+    }
   }
 
   //TODO I'd like to make some terrain tiles transparent and draw animated parallax layers behind. Decorative, not urgent.

@@ -27,7 +27,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Map loader.
 - [x] Sprite loader.
 - [x] Hero sprite. Motion etc.
-- [ ] Camera lock.
+- [x] Camera lock.
 - [ ] Carry things.
 - [ ] Active things.
 - [ ] Hazards.

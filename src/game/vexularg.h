@@ -14,6 +14,7 @@
 #define FBH 88
 
 #define SOUND_BLACKOUT_LIMIT 32
+#define CAMLOCK_LIMIT 4 /* There will probably be just one. */
 
 extern struct g {
 
@@ -37,6 +38,9 @@ extern struct g {
   int mapcmdc;
   uint8_t physics[256]; // Single tilesheet, we load it just once.
   int camerax,cameray;
+  int camera_cut; // If nonzero, next camera update will go immediately to its target.
+  struct camlock { uint8_t x,y,w,h; } camlockv[CAMLOCK_LIMIT];
+  int camlockc;
   
   struct sprite **spritev;
   int spritec,spritea;

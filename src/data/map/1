@@ -57,3 +57,4 @@
 image image:terrain
 sprite @44,31 sprite:hero (u32)0
 sprite @55,31 sprite:moon (u32)0
+camlock @40,22,20,11

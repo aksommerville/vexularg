@@ -25,11 +25,22 @@ static int res_welcome_map(const void *src,int srcc) {
   g.maph=rmap.h;
   g.mapcmd=rmap.cmd;
   g.mapcmdc=rmap.cmdc;
+  g.camlockc=0;
   struct cmdlist_reader reader={.v=rmap.cmd,.c=rmap.cmdc};
   struct cmdlist_entry cmd;
   while (cmdlist_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
-      //TODO Process one-time map commands, eg capture POI that need realtime access.
+
+      case CMD_map_camlock: {
+          if (g.camlockc<CAMLOCK_LIMIT) {
+            struct camlock *camlock=g.camlockv+g.camlockc++;
+            camlock->x=cmd.arg[0];
+            camlock->y=cmd.arg[1];
+            camlock->w=cmd.arg[2];
+            camlock->h=cmd.arg[3];
+          }
+        } break;
+
     }
   }
   return 0;
