@@ -9,6 +9,7 @@ struct sprite_thing {
   double animclock;
   int carried;
   int same_direction; // While (carried), nonzero means our xform should be the same as the hero's.
+  double ratelimit; // Clock that runs when fan or magnet strikes nothing, so we don't spin too much wheel.
 };
 
 #define SPRITE ((struct sprite_thing*)sprite)
@@ -28,6 +29,93 @@ static int _thing_init(struct sprite *sprite) {
   return 0;
 }
 
+/* Pull or push things in my horizontal line of sight.
+ * (d>0) to push for (d<0) to pull.
+ * Returns nonzero if we attempted to move another sprite.
+ */
+ 
+static int thing_update_fan_or_magnet(struct sprite *sprite,double elapsed,double d) {
+  
+  // Start with a ribbon of the correct vertical bounds, extending to both horizontal edges.
+  double l=0.0,r=g.mapw;
+  double t=sprite->y-0.5,b=sprite->y+0.5;
+  
+  // Then crop it horizontally based on my xform. Natural orientation is rightward.
+  // Fudge outward a little to make sure we won't detect ourself.
+  if (sprite->xform&EGG_XFORM_XREV) r=sprite->x-0.6;
+  else l=sprite->x+0.6;
+  
+  // Scan the entire set of sprites to find the nearest which is attractable and touches the ribbon.
+  // We only affect one other sprite at a time, or none.
+  struct sprite *best=0;
+  double bestdistance;
+  struct sprite **otherp=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (other->defunct) continue;
+    if (!other->attractable) continue;
+    if (other->y-0.5>=b) continue;
+    if (other->y+0.5<=t) continue;
+    double distance;
+    if (sprite->xform&EGG_XFORM_XREV) distance=sprite->x-other->x;
+    else distance=other->x-sprite->x;
+    if (distance<0.5) continue; // behind me
+    if (!best||(distance<bestdistance)) {
+      best=other;
+      bestdistance=distance;
+    }
+  }
+  if (!best) return 0;
+  
+  // Intersect our vertical extents and quantize the ribbon between us.
+  // Intersecting is super simple, because all sprites are the same height.
+  if (sprite->y>best->y) {
+    t=sprite->y-0.5;
+    b=best->y+0.5;
+  } else {
+    t=best->y-0.5;
+    b=sprite->y+0.5;
+  }
+  int rowa=(int)t; if (rowa<0) rowa=0;
+  int rowz=(int)(b-0.001); if (rowz>=g.maph) rowz=g.maph-1;
+  if (rowa>rowz) return 0;
+  int cola=(int)sprite->x;
+  int colz=(int)best->x;
+  if (cola>colz) {
+    int tmp=cola;
+    cola=colz;
+    colz=tmp;
+  }
+  if (cola<0) cola=0;
+  if (colz>=g.mapw) colz=g.mapw-1;
+  if (cola>colz) return 0;
+  
+  // At least one row of that ribbon must be fully passable.
+  int lineofsight=0;
+  const uint8_t *cellrow=g.cellv+rowa*g.mapw+cola;
+  int row=rowa;
+  for (;row<=rowz;row++,cellrow+=g.mapw) {
+    lineofsight=1;
+    const uint8_t *cellp=cellrow;
+    int col=cola;
+    for (;col<=colz;col++,cellp++) {
+      if (g.physics[*cellp]==NS_physics_solid) {
+        lineofsight=0;
+        break;
+      }
+    }
+    if (lineofsight) break;
+  }
+  if (!lineofsight) return 0;
+  
+  // OK let's move it!
+  if (sprite->xform&EGG_XFORM_XREV) d=-d;
+  const double BLOW_SPEED=4.000;
+  sprite_move(best,d*elapsed*BLOW_SPEED,0.0);
+  return 1;
+}
+
 /* Update.
  */
  
@@ -41,12 +129,14 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
           sprite->tileid++;
           if (sprite->tileid>=SPRITE->tileid0+5) sprite->tileid=SPRITE->tileid0;
         }
-        //TODO blow
+        if (SPRITE->ratelimit>0.0) SPRITE->ratelimit-=elapsed;
+        else if (!thing_update_fan_or_magnet(sprite,elapsed,1.0)) SPRITE->ratelimit=0.250;
       } break;
       
     // Magnet is the opposite of fan.
     case NS_role_magnet: {
-        //TODO suck
+        if (SPRITE->ratelimit>0.0) SPRITE->ratelimit-=elapsed;
+        else if (!thing_update_fan_or_magnet(sprite,elapsed,-1.0)) SPRITE->ratelimit=0.250;
       } break;
       
     // Balloon diminishes gravity and enhances jump -- hero takes care of that. When left alone, we slowly rise.
@@ -147,6 +237,9 @@ int sprite_thing_get_dropped(struct sprite *sprite,struct sprite *hero) {
     sprite->x=hero->x;
     sprite->y=hy0;
   } else {
+    // Correct our x position right quick. This comes up when hero is under the influence of a magnet or fan.
+    if (hero->xform==EGG_XFORM_XREV) sprite->x=hero->x-1.0;
+    else sprite->x=hero->x+1.0;
     if (sprite_collides_anything(sprite)) return 0;
   }
   SPRITE->carried=0;

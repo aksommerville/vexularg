@@ -37,6 +37,7 @@ struct sprite {
   int solid;
   struct sprite *collcause; // WEAK. After a move returns zero, if caused by another sprite, we disclose it here.
   int layer; // Render order low to high. Hero is at 100, and that is the default.
+  int attractable; // Magnet and fan can affect.
 };
 
 /* Primitive delete and initialize.

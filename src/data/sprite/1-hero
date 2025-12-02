@@ -2,3 +2,4 @@ type (u16:sprtype)hero
 image image:sprites
 solid
 tile 0 0
+attractable

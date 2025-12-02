@@ -4,3 +4,4 @@ tile 68 0
 solid
 role (u16:role)inert
 layer (u16)98
+attractable

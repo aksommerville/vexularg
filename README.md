@@ -29,7 +29,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Hero sprite. Motion etc.
 - [x] Camera lock.
 - [x] Carry things.
-- [ ] Active things.
+- [x] Active things.
 - [ ] Hazards.
 - - [ ] What happens when you get hurt?
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
