@@ -61,11 +61,17 @@ void scene_update(double elapsed) {
    */
   for (i=g.spritec;i-->0;) {
     struct sprite *sprite=g.spritev[i];
-    if (!sprite->defunct) continue;
-    g.spritec--;
-    memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
-    sprite_del_unlisted(sprite);
-    if (g.hero==sprite) g.hero=0;
+    if (sprite->defunct) {
+      g.spritec--;
+      memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
+      sprite_del_unlisted(sprite);
+      if (g.hero==sprite) g.hero=0;
+    } else if (sprite->unlist_soon) {
+      sprite->unlist_soon=0;
+      g.spritec--;
+      memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
+      if (g.hero==sprite) g.hero=0;
+    }
   }
 }
 

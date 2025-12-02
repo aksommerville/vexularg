@@ -3,3 +3,4 @@ tile 86 0
 type (u16:sprtype)thing
 solid
 role (u16:role)inert
+layer (u16)98

@@ -27,6 +27,7 @@ struct sprite_type {
 struct sprite {
   const struct sprite_type *type;
   int defunct; // Set nonzero to reap after the current update cycle. Do not delete sprites directly.
+  int unlist_soon; // Ugly hack to have this sprite unlisted at the end of the update.
   double x,y; // World meters.
   uint8_t tileid,xform;
   int rid;
@@ -49,6 +50,8 @@ struct sprite *sprite_new(
   uint32_t arg,
   int rid,const void *cmd,int cmdc
 );
+void sprite_unlist(struct sprite *sprite);
+int sprite_list(struct sprite *sprite);
 
 /* Create a sprite, register it globally, and return a WEAK reference.
  * Provide as much detail as you have and we'll fill in the rest.
@@ -75,6 +78,9 @@ FOR_EACH_SPRTYPE
 
 const struct sprite_type *sprite_type_from_id(int id);
 
+int sprite_thing_get_carried(struct sprite *sprite,struct sprite *hero);
+int sprite_thing_get_dropped(struct sprite *sprite,struct sprite *hero);
+
 /* Physics.
  ***************************************************************/
 
@@ -82,5 +88,7 @@ const struct sprite_type *sprite_type_from_id(int id);
  * Returns nonzero if it moved at all, not necessarily as much as you asked for.
  */
 int sprite_move(struct sprite *sprite,double dx,double dy);
+
+int sprite_collides_anything(const struct sprite *sprite);
 
 #endif

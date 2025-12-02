@@ -3,3 +3,4 @@ tile 99 0
 type (u16:sprtype)thing
 solid
 role (u16:role)fan
+layer (u16)98

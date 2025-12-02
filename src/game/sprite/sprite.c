@@ -3,7 +3,7 @@
 /* Unlist.
  */
  
-static void sprite_unlist(struct sprite *sprite) {
+void sprite_unlist(struct sprite *sprite) {
   if (sprite==g.hero) g.hero=0;
   int i=g.spritec;
   struct sprite **qp=g.spritev+i-1;
@@ -15,6 +15,24 @@ static void sprite_unlist(struct sprite *sprite) {
       return;
     }
   }
+}
+
+/* List.
+ */
+ 
+int sprite_list(struct sprite *sprite) {
+  if (!sprite) return -1;
+  if (g.spritec>=g.spritea) {
+    int na=g.spritea+32;
+    if (na>INT_MAX/sizeof(void*)) return 0;
+    void *nv=realloc(g.spritev,sizeof(void*)*na);
+    if (!nv) return 0;
+    g.spritev=nv;
+    g.spritea=na;
+  }
+  g.spritev[g.spritec++]=sprite;
+  if (!g.hero&&(sprite->type==&sprite_type_hero)) g.hero=sprite;
+  return 0;
 }
 
 /* Delete and unlist.
@@ -102,18 +120,10 @@ struct sprite *sprite_spawn(
 ) {
   struct sprite *sprite=sprite_new(type,x,y,arg,rid,cmd,cmdc);
   if (!sprite) return 0;
-  
-  if (g.spritec>=g.spritea) {
-    int na=g.spritea+32;
-    if (na>INT_MAX/sizeof(void*)) return 0;
-    void *nv=realloc(g.spritev,sizeof(void*)*na);
-    if (!nv) return 0;
-    g.spritev=nv;
-    g.spritea=na;
+  if (sprite_list(sprite)<0) {
+    sprite_del(sprite);
+    return 0;
   }
-  g.spritev[g.spritec++]=sprite;
-  if (!g.hero&&(sprite->type==&sprite_type_hero)) g.hero=sprite;
-  
   return sprite;
 }
 

@@ -3,3 +3,4 @@ tile 85 0
 type (u16:sprtype)thing
 solid
 role (u16:role)balloon
+layer (u16)98

@@ -19,6 +19,7 @@ struct sprite_hero {
   int jump_blackout; // Must release button before starting another jump.
   double gravity; // Only relevant while (falling>0).
   double gravity_y0; // Position at start of falling, so we can compute final force.
+  struct sprite *pumpkin; // STRONG and unlisted, if not null.
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -27,6 +28,7 @@ struct sprite_hero {
  */
  
 static void _hero_del(struct sprite *sprite) {
+  sprite_del(SPRITE->pumpkin);
 }
 
 /* Init.
@@ -35,6 +37,44 @@ static void _hero_del(struct sprite *sprite) {
 static int _hero_init(struct sprite *sprite) {
   SPRITE->jump_blackout=1; // Wait for SOUTH to release before a first jump, in case a stroke of SOUTH started the game.
   return 0;
+}
+
+/* If we're carrying something, drop it.
+ * Otherwise, if something is in range, pick it up.
+ */
+ 
+static void hero_pickup_or_drop(struct sprite *sprite) {
+  if (SPRITE->pumpkin) {
+    if (sprite_thing_get_dropped(SPRITE->pumpkin,sprite)) {
+      sprite_list(SPRITE->pumpkin);
+      SPRITE->pumpkin=0;
+      sfx_spatial(RID_sound_drop,sprite->x,sprite->y);
+    } else {
+      sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
+    }
+    return;
+  }
+  double fx=sprite->x;
+  double fy=sprite->y;
+  if (sprite->xform) fx-=1.0; else fx+=1.0;
+  struct sprite **otherp=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (!other->solid) continue;
+    if (other->defunct) continue;
+    if (other->type!=&sprite_type_thing) continue;
+    double dx=fx-other->x;
+    if ((dx<-0.5)||(dx>0.5)) continue;
+    double dy=fy-other->y;
+    if ((dy<-0.5)||(dy>0.5)) continue;
+    if (!sprite_thing_get_carried(other,sprite)) continue;
+    other->unlist_soon=1;
+    SPRITE->pumpkin=other;
+    sfx_spatial(RID_sound_pickup,sprite->x,sprite->y);
+    return;
+  }
+  sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
 }
 
 /* Test for down-jump.
@@ -146,6 +186,21 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->jumpclock=JUMP_TIME;
     }
   }
+  
+  // Pick up or drop things on WEST.
+  if ((g.input&EGG_BTN_WEST)&&!(g.pvinput&EGG_BTN_WEST)) {
+    hero_pickup_or_drop(sprite);
+  }
+  
+  // If we have a pumpkin, update it.
+  if (SPRITE->pumpkin) {
+    if (SPRITE->pumpkin->defunct) {
+      sprite_del(SPRITE->pumpkin);
+      SPRITE->pumpkin=0;
+    } else if (SPRITE->pumpkin->type->update) {
+      SPRITE->pumpkin->type->update(SPRITE->pumpkin,elapsed);
+    }
+  }
 }
 
 /* Render.
@@ -155,7 +210,7 @@ static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
   // Our nominal (tileid) is the head. Natural orientation is rightward.
   // Our position is the body.
   uint8_t tileid=sprite->tileid;
-  if (0) tileid+=0x20;//TODO if carrying. orthogonal to all others
+  if (SPRITE->pumpkin) tileid+=0x20;
   if (SPRITE->falling<0) { // Jumping.
     tileid+=3;
   } else if (SPRITE->falling>0) { // Falling.
@@ -166,6 +221,21 @@ static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
   }
   graf_tile(&g.graf,dstx,dsty-NS_sys_tilesize,tileid,sprite->xform);
   graf_tile(&g.graf,dstx,dsty,tileid+0x10,sprite->xform);
+  
+  /* If we have a pumpkin, render it.
+   * It's not in the global list while carried, so it won't render itself.
+   * And that's important! Rounding errors would cause it to jitter relative to the hero if it rendered independently.
+   */
+  if (SPRITE->pumpkin) {
+    int pdstx=dstx;
+    if (sprite->xform&EGG_XFORM_XREV) pdstx-=NS_sys_tilesize; else pdstx+=NS_sys_tilesize;
+    int pdsty=dsty-(NS_sys_tilesize>>1);
+    if (SPRITE->pumpkin->type->render) {
+      SPRITE->pumpkin->type->render(SPRITE->pumpkin,pdstx,pdsty);
+    } else {
+      graf_tile(&g.graf,pdstx,pdsty,SPRITE->pumpkin->tileid,SPRITE->pumpkin->xform);
+    }
+  }
 }
 
 /* Type definition.

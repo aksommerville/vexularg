@@ -3,3 +3,4 @@ tile 83 0
 type (u16:sprtype)thing
 solid
 role (u16:role)trampoline
+layer (u16)98

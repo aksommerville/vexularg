@@ -116,3 +116,53 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
   sprite->y=ny;
   return 1;
 }
+
+/* Collision test only, no rectification.
+ */
+ 
+int sprite_collides_anything(const struct sprite *sprite) {
+  if (!sprite) return 0;
+  
+  int cola=(int)(sprite->x-0.5); if (cola<0) cola=0;
+  int colz=(int)(sprite->x+0.5-SMALL); if (colz>=g.mapw) colz=g.mapw-1;
+  int rowa=(int)(sprite->y-0.5); if (rowa<0) rowa=0;
+  int rowz=(int)(sprite->y+0.5-SMALL); if (rowz>=g.maph) rowz=g.maph-1;
+  if ((cola<=colz)&&(rowa<=rowz)) {
+    const uint8_t *cellrow=g.cellv+rowa*g.mapw+cola;
+    int row=rowa;
+    for (;row<=rowz;row++,cellrow+=g.mapw) {
+      const uint8_t *cellp=cellrow;
+      int col=cola;
+      for (;col<=colz;col++,cellp++) {
+        uint8_t physics=g.physics[*cellp];
+        switch (physics) {
+          // Always:
+          case NS_physics_solid:
+            break;
+          // oneways never count here, since the sprite is not in motion.
+          // Never:
+          default: continue;
+        }
+        return 1;
+      }
+    }
+  }
+  
+  struct sprite **otherp=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (!other->solid) continue;
+    if (other->defunct) continue;
+    if (other==sprite) continue;
+    
+    double dx=other->x-sprite->x;
+    if ((dx<=-1.0)||(dx>=1.0)) continue;
+    double dy=other->y-sprite->y;
+    if ((dy<=-1.0)||(dy>=1.0)) continue;
+    
+    return 1;
+  }
+  
+  return 0;
+}
