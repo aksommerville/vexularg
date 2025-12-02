@@ -8,7 +8,12 @@
  
 int scene_reset() {
 
-  //TODO Drop sprites.
+  // Drop sprites.
+  g.hero=0;
+  while (g.spritec>0) {
+    struct sprite *sprite=g.spritev[--g.spritec];
+    sprite_del_unlisted(sprite);
+  }
   
   /* Run map commands.
    */
@@ -27,7 +32,8 @@ int scene_reset() {
     }
   }
   
-  //TODO Restart music.
+  // Restart music.
+  song(RID_song_unto_thee);
   
   return 0;
 }
@@ -36,7 +42,29 @@ int scene_reset() {
  */
  
 void scene_update(double elapsed) {
-  //TODO
+
+  /* Update all sprites that can.
+   */
+  int i=g.spritec;
+  while (i-->0) {
+    struct sprite *sprite=g.spritev[i];
+    if (sprite->defunct) continue;
+    if (!sprite->type->update) continue;
+    sprite->type->update(sprite,elapsed);
+  }
+  
+  //TODO Terminal conditions.
+  
+  /* Drop defunct sprites.
+   */
+  for (i=g.spritec;i-->0;) {
+    struct sprite *sprite=g.spritev[i];
+    if (!sprite->defunct) continue;
+    g.spritec--;
+    memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
+    sprite_del_unlisted(sprite);
+    if (g.hero==sprite) g.hero=0;
+  }
 }
 
 /* Render.

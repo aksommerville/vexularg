@@ -38,8 +38,10 @@ struct sprite {
 
 /* Primitive delete and initialize.
  * Don't use these from outside. Prefer "defunct" and "spawn".
+ * sprite_del_unlisted() if the caller guarantees it's not in (g.spritev), so we can skip searching.
  */
 void sprite_del(struct sprite *sprite);
+void sprite_del_unlisted(struct sprite *sprite);
 struct sprite *sprite_new(
   const struct sprite_type *type,
   double x,double y,
@@ -72,7 +74,12 @@ FOR_EACH_SPRTYPE
 
 const struct sprite_type *sprite_type_from_id(int id);
 
-/* Physics. TODO
+/* Physics.
  ***************************************************************/
+
+/* Move a presumably solid sprite and correct collisions immediately.
+ * Returns nonzero if it moved at all, not necessarily as much as you asked for.
+ */
+int sprite_move(struct sprite *sprite,double dx,double dy);
 
 #endif

@@ -13,6 +13,8 @@
 #define FBW 160
 #define FBH 88
 
+#define SOUND_BLACKOUT_LIMIT 32
+
 extern struct g {
 
   void *rom;
@@ -39,7 +41,18 @@ extern struct g {
   struct sprite **spritev;
   int spritec,spritea;
   struct sprite *hero; // WEAK, OPTIONAL. Maintained sneakily by generic sprite allocator.
+  
+  int song_playing;
+  struct sound_blackout {
+    int rid;
+    double time;
+  } sound_blackoutv[SOUND_BLACKOUT_LIMIT];
+  int sound_blackoutc;
 } g;
+
+void sfx_spatial(int rid,double x,double y); // (x,y) in world meters
+void sfx_full(int rid);
+void song(int rid);
 
 int res_init();
 int res_search(int tid,int rid);

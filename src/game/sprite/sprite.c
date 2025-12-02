@@ -26,6 +26,12 @@ void sprite_del(struct sprite *sprite) {
   if (sprite->type->del) sprite->type->del(sprite);
   free(sprite);
 }
+ 
+void sprite_del_unlisted(struct sprite *sprite) {
+  if (!sprite) return;
+  if (sprite->type->del) sprite->type->del(sprite);
+  free(sprite);
+}
 
 /* Allocate, initialize. Do not list.
  */

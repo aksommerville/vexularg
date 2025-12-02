@@ -28,8 +28,6 @@ int egg_client_init() {
   //TODO Hello modal.
   if (scene_reset()<0) return -1;
 
-  egg_play_song(1,RID_song_unto_thee,1,0.5,0.0);//XXX TEMP
-
   return 0;
 }
 
@@ -58,4 +56,72 @@ void egg_client_render() {
   //TODO Modals.
   scene_render();
   graf_flush(&g.graf);
+}
+
+/* Audio.
+ */
+ 
+static struct sound_blackout *sound_blackout_check(int rid) {
+  const double BLACKOUT_TIME=0.050; // Suppress sounds within about 20 Hz of each other.
+  double now=egg_time_real();
+  
+  // Reap expired records from the tail. Best effort only.
+  double oldtime=now-BLACKOUT_TIME;
+  while (g.sound_blackoutc&&(g.sound_blackoutv[g.sound_blackoutc-1].time<=oldtime)) g.sound_blackoutc--;
+  
+  struct sound_blackout *oldest=g.sound_blackoutv;
+  struct sound_blackout *q=g.sound_blackoutv;
+  int i=g.sound_blackoutc;
+  for (;i-->0;q++) {
+    if (q->rid==rid) {
+      double age=now-q->time;
+      if (age<BLACKOUT_TIME) return 0; // Already playing, don't start another.
+      // Reuse this record for the new play.
+      q->time=now;
+      return q;
+    }
+    if (q->time<oldest->time) oldest=q;
+  }
+  if (g.sound_blackoutc<SOUND_BLACKOUT_LIMIT) {
+    q=g.sound_blackoutv+g.sound_blackoutc++;
+  } else {
+    q=oldest;
+  }
+  q->time=now;
+  q->rid=rid;
+  return q;
+}
+ 
+void sfx_spatial(int rid,double x,double y) {
+  
+  // Normalize (x,y) around the camera's focus such that -1 and 1 are half a screen offscreen, those are the limits.
+  double midx=(double)(g.camerax+(FBW>>1))/(double)NS_sys_tilesize;
+  double rangex=(double)FBW/(double)NS_sys_tilesize;
+  x=(x-midx)/rangex;
+  if ((x<=-1.0)||(x>=1.0)) return;
+  double midy=(double)(g.cameray+(FBH>>1))/(double)NS_sys_tilesize;
+  double rangey=(double)FBH/(double)NS_sys_tilesize;
+  y=(y-midy)/rangey;
+  if ((y<=-1.0)||(y>=1.0)) return;
+  
+  // Spatial range checks out, so let's check the blackout too.
+  if (!sound_blackout_check(rid)) return;
+  
+  // Our normalized (x) is the final answer for pan.
+  // Trim is essentially the reverse of (x,y)'s magnitude.
+  double pan=x;
+  double trim=1.0-sqrt(x*x+y*y);
+  
+  egg_play_sound(rid,trim,pan);
+}
+
+void sfx_full(int rid) {
+  if (!sound_blackout_check(rid)) return;
+  egg_play_sound(rid,1.0,0.0);
+}
+
+void song(int rid) {
+  if (rid==g.song_playing) return;
+  g.song_playing=rid;
+  egg_play_song(1,rid,1,0.5,0.0);
 }
