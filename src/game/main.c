@@ -28,6 +28,8 @@ int egg_client_init() {
   //TODO Hello modal.
   if (scene_reset()<0) return -1;
 
+  egg_play_song(1,RID_song_unto_thee,1,0.5,0.0);//XXX TEMP
+
   return 0;
 }
 
