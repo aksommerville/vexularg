@@ -65,6 +65,7 @@ struct sprite *sprite_new(
   sprite->rid=rid;
   sprite->cmd=cmd;
   sprite->cmdc=cmdc;
+  sprite->layer=100;
   
   // Run commands generically.
   struct cmdlist_reader reader;
@@ -74,6 +75,7 @@ struct sprite *sprite_new(
       switch (cmd.opcode) {
         case CMD_sprite_solid: sprite->solid=1; break;
         case CMD_sprite_tile: sprite->tileid=cmd.arg[0]; sprite->xform=cmd.arg[1]; break;
+        case CMD_sprite_layer: sprite->layer=(cmd.arg[0]<<8)|cmd.arg[1]; break;
       }
     }
   }

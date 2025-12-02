@@ -27,6 +27,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Map loader.
 - [x] Sprite loader.
 - [x] Hero sprite. Motion etc.
+- [ ] Camera lock.
 - [ ] Carry things.
 - [ ] Active things.
 - [ ] Hazards.
@@ -35,6 +36,8 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [ ] Music.
 - [ ] Sound effects.
 - [ ] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
-- [ ] Moon reciting the incantation.
+- [x] Moon reciting the incantation.
 - [ ] Hello modal.
 - [ ] Gameover modal.
+- [ ] Coyote time.
+- [ ] Landing dust.

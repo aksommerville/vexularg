@@ -34,6 +34,7 @@ struct sprite {
   const void *cmd; // Entire sprite resource, including signature.
   int cmdc;
   int solid;
+  int layer; // Render order low to high. Hero is at 100, and that is the default.
 };
 
 /* Primitive delete and initialize.

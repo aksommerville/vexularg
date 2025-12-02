@@ -67,6 +67,37 @@ void scene_update(double elapsed) {
   }
 }
 
+/* Two passes of a cocktail sort on the sprite list, to bring them closer to render order.
+ * It's fine to be out of order for a little while, and we'll update this every frame.
+ */
+ 
+static int sprite_rendercmp(const struct sprite *a,const struct sprite *b) {
+  return a->layer-b->layer;
+}
+ 
+static void sort_sprites_partial() {
+  if (g.spritec<2) return;
+  int done=1,i=1;
+  for (;i<g.spritec;i++) {
+    struct sprite *a=g.spritev[i-1];
+    struct sprite *b=g.spritev[i];
+    if (sprite_rendercmp(a,b)>0) {
+      g.spritev[i-1]=b;
+      g.spritev[i]=a;
+      done=0;
+    }
+  }
+  if (done) return;
+  for (i=g.spritec-1;i-->0;) {
+    struct sprite *a=g.spritev[i];
+    struct sprite *b=g.spritev[i+1];
+    if (sprite_rendercmp(a,b)>0) {
+      g.spritev[i]=b;
+      g.spritev[i+1]=a;
+    }
+  }
+}
+
 /* Render.
  */
  
@@ -125,12 +156,13 @@ void scene_render() {
   /* Sprites.
    * We're doing a large single map with one set of sprites distributed about it.
    * It's worth a little effort to cull sprite well offscreen.
-   * Assume that no sprite is wider than 2 meters.
+   * Beware that some sprites cast a wide shadow, particularly Moon Song.
    */
-  double viewl=(double)(g.camerax-NS_sys_tilesize)/(double)NS_sys_tilesize;
-  double viewt=(double)(g.cameray-NS_sys_tilesize)/(double)NS_sys_tilesize;
-  double viewr=(double)(g.camerax+FBW+NS_sys_tilesize)/(double)NS_sys_tilesize;
-  double viewb=(double)(g.cameray+FBH+NS_sys_tilesize)/(double)NS_sys_tilesize;
+  sort_sprites_partial();
+  double viewl=(double)(g.camerax-NS_sys_tilesize*6)/(double)NS_sys_tilesize;
+  double viewt=(double)(g.cameray-NS_sys_tilesize*6)/(double)NS_sys_tilesize;
+  double viewr=(double)(g.camerax+FBW+NS_sys_tilesize*6)/(double)NS_sys_tilesize;
+  double viewb=(double)(g.cameray+FBH+NS_sys_tilesize*6)/(double)NS_sys_tilesize;
   graf_set_input(&g.graf,g.texid_sprites);
   struct sprite **p=g.spritev;
   int i=g.spritec;
