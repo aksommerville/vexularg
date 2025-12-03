@@ -44,6 +44,10 @@ void egg_client_update(double elapsed) {
   g.pvinput=g.input;
   g.input=egg_input_get_one(0);
   
+  if (0) { // XXX Run the clock fast until close to expiry, for testing the spell's timing.
+    if (g.time_remaining>=10.0) elapsed*=10.0;
+  }
+  
   //TODO Modals.
   scene_update(elapsed);
 }

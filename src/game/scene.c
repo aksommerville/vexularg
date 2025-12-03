@@ -36,6 +36,8 @@ int scene_reset() {
   song(RID_song_unto_thee);
   
   g.camera_cut=1;
+  g.time_remaining=120.0; // TODO Coordinate with Moon, ensure the spell is just this long.
+  g.game_over=0;
   
   return 0;
 }
@@ -55,8 +57,6 @@ void scene_update(double elapsed) {
     sprite->type->update(sprite,elapsed);
   }
   
-  //TODO Terminal conditions.
-  
   /* Drop defunct sprites.
    */
   for (i=g.spritec;i-->0;) {
@@ -72,6 +72,15 @@ void scene_update(double elapsed) {
       memmove(g.spritev+i,g.spritev+i+1,sizeof(void*)*(g.spritec-i));
       if (g.hero==sprite) g.hero=0;
     }
+  }
+  
+  /* Tick the master clock and end the game when it expires.
+   */
+  if (!g.game_over) {
+  if ((g.time_remaining-=elapsed)<=0.0) {
+    fprintf(stderr,"Game over!\n");//TODO start a modal or something?
+    g.game_over=1;
+  }
   }
 }
 
@@ -216,5 +225,16 @@ void scene_render() {
     }
   }
   
-  //TODO Overlay.
+  /* Time remaining, upper-right corner.
+   * These use the sprites texture, which is already active.
+   */
+  int ms=(int)(g.time_remaining*1000.0);
+  if (ms<0) ms=0;
+  int sec=ms/1000; ms%=1000;
+  int min=sec/60; sec%=60;
+  if (min>9) { min=9; sec=99; ms=999; }
+  graf_tile(&g.graf,FBW-3,4,0x70+sec%10,0);
+  graf_tile(&g.graf,FBW-7,4,0x70+sec/10,0);
+  if (!ms||(ms>=200)) graf_tile(&g.graf,FBW-10,4,0x7a,0);
+  graf_tile(&g.graf,FBW-13,4,0x70+min,0);
 }

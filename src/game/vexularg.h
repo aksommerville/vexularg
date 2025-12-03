@@ -41,6 +41,8 @@ extern struct g {
   int camera_cut; // If nonzero, next camera update will go immediately to its target.
   struct camlock { uint8_t x,y,w,h; } camlockv[CAMLOCK_LIMIT];
   int camlockc;
+  double time_remaining;
+  int game_over;//XXX TEMP
   
   struct sprite **spritev;
   int spritec,spritea;

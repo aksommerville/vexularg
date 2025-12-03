@@ -30,12 +30,14 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Camera lock.
 - [x] Carry things.
 - [x] Active things.
-- [ ] Hazards.
-- - [ ] What happens when you get hurt?
+- [x] Hazards. ...NO. No danger, it's a friendly kind of game.
+- - [x] What happens when you get hurt?
+- [ ] Final maps.
+- [ ] Final timing. First pick a duration based on the map. Must be difficult but possible to collect all the things. Then tune Moon Song to fit.
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
 - [ ] Music.
 - [ ] Sound effects.
-- [ ] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
+- [x] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
 - [x] Moon reciting the incantation.
 - [ ] Hello modal.
 - [ ] Gameover modal.
