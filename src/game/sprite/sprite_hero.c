@@ -209,7 +209,7 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
         SPRITE->gravity=GRAVITY_INITIAL;
         SPRITE->gravity_y0=sprite->y;
         SPRITE->jump_blackout=1;
-      } else {
+      } else if (!(g.pvinput&EGG_BTN_SOUTH)) {
         sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
       }
     } else { // Begin regular jump.

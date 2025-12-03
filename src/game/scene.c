@@ -37,7 +37,8 @@ int scene_reset() {
   
   g.camera_cut=1;
   g.time_remaining=120.0; // TODO Coordinate with Moon, ensure the spell is just this long.
-  g.game_over=0;
+  g.hello_running=0;
+  g.gameover_running=0;
   
   return 0;
 }
@@ -76,11 +77,8 @@ void scene_update(double elapsed) {
   
   /* Tick the master clock and end the game when it expires.
    */
-  if (!g.game_over) {
   if ((g.time_remaining-=elapsed)<=0.0) {
-    fprintf(stderr,"Game over!\n");//TODO start a modal or something?
-    g.game_over=1;
-  }
+    gameover_begin();
   }
 }
 
@@ -237,4 +235,14 @@ void scene_render() {
   graf_tile(&g.graf,FBW-7,4,0x70+sec/10,0);
   if (!ms||(ms>=200)) graf_tile(&g.graf,FBW-10,4,0x7a,0);
   graf_tile(&g.graf,FBW-13,4,0x70+min,0);
+  
+  /* Extra blinking "Hurry!" message when time is short.
+   * Ensure its phase is such that nothing renders at ms==0.
+   */
+  if (!min&&(sec<=20)&&(ms>=300)) {
+    graf_tile(&g.graf,FBW-21,4,0x7e,0);
+    graf_tile(&g.graf,FBW-29,4,0x7d,0);
+    graf_tile(&g.graf,FBW-37,4,0x7c,0);
+    graf_tile(&g.graf,FBW-45,4,0x7b,0);
+  }
 }

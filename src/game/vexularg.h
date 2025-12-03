@@ -30,7 +30,11 @@ extern struct g {
   
   int input,pvinput;
   
-  //TODO Bespoke modals.
+  // hello modal
+  int hello_running;
+  
+  // gameover modal
+  int gameover_running;
   
   const uint8_t *cellv;
   int mapw,maph; // Dimensions are not fixed at build time, tho they could be. Treat them as dynamic.
@@ -42,7 +46,6 @@ extern struct g {
   struct camlock { uint8_t x,y,w,h; } camlockv[CAMLOCK_LIMIT];
   int camlockc;
   double time_remaining;
-  int game_over;//XXX TEMP
   
   struct sprite **spritev;
   int spritec,spritea;
@@ -71,5 +74,13 @@ int res_get_string(void *dstpp,int rid,int strix);
 int scene_reset();
 void scene_update(double elapsed);
 void scene_render(); // Overwrites all.
+
+void hello_begin();
+void hello_update(double elapsed);
+void hello_render();
+
+void gameover_begin();
+void gameover_update(double elapsed);
+void gameover_render();
 
 #endif

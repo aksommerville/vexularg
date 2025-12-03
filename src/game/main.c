@@ -25,8 +25,7 @@ int egg_client_init() {
 
   srand_auto();
 
-  //TODO Hello modal.
-  if (scene_reset()<0) return -1;
+  hello_begin();
 
   return 0;
 }
@@ -48,8 +47,9 @@ void egg_client_update(double elapsed) {
     if (g.time_remaining>=10.0) elapsed*=10.0;
   }
   
-  //TODO Modals.
-  scene_update(elapsed);
+  if (g.hello_running) hello_update(elapsed);
+  else if (g.gameover_running) gameover_update(elapsed);
+  else scene_update(elapsed);
 }
 
 /* Render.
@@ -57,8 +57,9 @@ void egg_client_update(double elapsed) {
 
 void egg_client_render() {
   graf_reset(&g.graf);
-  //TODO Modals.
-  scene_render();
+  if (g.hello_running) hello_render();
+  else if (g.gameover_running) gameover_render();
+  else scene_render();
   graf_flush(&g.graf);
 }
 
