@@ -79,7 +79,7 @@ extern struct g {
 
 void sfx_spatial(int rid,double x,double y); // (x,y) in world meters
 void sfx_full(int rid);
-void song(int rid);
+void song(int rid,int repeat);
 
 int res_init();
 int res_search(int tid,int rid);

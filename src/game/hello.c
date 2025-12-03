@@ -14,7 +14,7 @@ void hello_begin() {
     egg_texture_get_size(&g.titlew,&g.titleh,g.texid_title);
   }
   
-  song(RID_song_eternal_torment);//TODO song -- eternal_torment is an oldie, not written for this jam
+  song(RID_song_wrath_of_vexularg,1);
 }
 
 /* Update.

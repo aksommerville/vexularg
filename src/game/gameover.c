@@ -123,9 +123,9 @@ void gameover_update(double elapsed) {
   double musictime=g.thingc?9.5:5.5;
   if ((g.gameover_clock>=musictime)&&(pvclock<musictime)) {
     if (g.score>=NS_score_ok) {
-      song(RID_song_unto_thee);//TODO success music
+      song(RID_song_shave_and_a_haircut);
     } else {
-      song(RID_song_unto_thee);//TODO failure music
+      song(RID_song_inadequate_offering,0);
     }
   }
   

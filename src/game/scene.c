@@ -33,7 +33,7 @@ int scene_reset() {
   }
   
   // Restart music.
-  song(RID_song_unto_thee);
+  song(RID_song_unto_thee,1);
   
   g.camera_cut=1;
   g.time_remaining=120.0; // TODO Coordinate with Moon, ensure the spell is just this long.
