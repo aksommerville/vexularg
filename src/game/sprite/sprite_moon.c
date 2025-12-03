@@ -65,6 +65,9 @@ static void _moon_update(struct sprite *sprite,double elapsed) {
     if (++(SPRITE->animframe)>=2) SPRITE->animframe=0;
   }
   SPRITE->scroll+=elapsed*SCROLL_RATE;
+  
+  // Force to the end of the incantation if the global time is up (eg for fast-forward dev runs).
+  if (g.time_remaining<=0.0) SPRITE->scroll=SPRITE->texh;
 }
 
 /* Render.

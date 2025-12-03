@@ -37,11 +37,11 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - - In the test map with a 2:00 limit, I can only get 7/8 items, and that's a stretch.
 - - ...actually, can get all 8. But again, a stretch.
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
-- [ ] Music.
+- [ ] Music: hello, success, failure.
 - [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
 - [x] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
 - [x] Moon reciting the incantation.
 - [ ] Hello modal.
-- [ ] Gameover modal.
+- [x] Gameover modal.
 - [ ] Coyote time.
 - [ ] Landing dust.

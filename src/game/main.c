@@ -42,11 +42,6 @@ void egg_client_notify(int k,int v) {
 void egg_client_update(double elapsed) {
   g.pvinput=g.input;
   g.input=egg_input_get_one(0);
-  
-  if (0) { // XXX Run the clock fast until close to expiry, for testing the spell's timing.
-    if (g.time_remaining>=5.0) elapsed*=20.0;
-  }
-  
   if (g.hello_running) {
     hello_update(elapsed);
   } else {

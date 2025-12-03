@@ -11,7 +11,8 @@ void gameover_begin() {
   g.modal_blackout=1.000;
   g.gameover_clock=0.0;
   
-  //TODO song
+  // Music stops as the suspense builds...
+  song(0);
   
   /* Put the hero sprite in her initial position, and tell the camera to cut.
    * Note the bounds of the offeratorium.
@@ -96,9 +97,8 @@ void gameover_begin() {
    */
   const char *msg=0;
   int msgc=res_get_string(&msg,1,5+g.score);
-  fprintf(stderr,"score=%d, Vexularg's opinion: '%.*s'\n",g.score,msgc,msg);
   if (!g.texid_judgment) g.texid_judgment=egg_texture_new();
-  const int msg_wlimit=NS_sys_tilesize*7-4;
+  const int msg_wlimit=NS_sys_tilesize*10-4;
   const int msg_hlimit=NS_sys_tilesize*3-4;
   font_render_to_texture(g.texid_judgment,g.font,msg,msgc,msg_wlimit,msg_hlimit,0x000000ff);
   egg_texture_get_size(&g.judgmentw,&g.judgmenth,g.texid_judgment);
@@ -108,12 +108,24 @@ void gameover_begin() {
  */
  
 void gameover_update(double elapsed) {
+  double pvclock=g.gameover_clock;
   g.gameover_clock+=elapsed;
+  
   if (g.modal_blackout>0.500) {
     g.modal_blackout-=elapsed;
   } else {
     if ((g.input&EGG_BTN_SOUTH)&&!(g.pvinput&EGG_BTN_SOUTH)) {
       hello_begin();
+    }
+  }
+  
+  // Start the gameover music about when the message appears.
+  double musictime=g.thingc?9.5:5.5;
+  if ((g.gameover_clock>=musictime)&&(pvclock<musictime)) {
+    if (g.score>=NS_score_ok) {
+      song(RID_song_unto_thee);//TODO success music
+    } else {
+      song(RID_song_unto_thee);//TODO failure music
     }
   }
   
@@ -133,13 +145,70 @@ void gameover_update(double elapsed) {
  */
  
 void gameover_render() {
+
+  /* Timing is different depending on whether at least one thing is present.
+   * The first phase of gameover is showing the things levitate up to the offeratory position,
+   * but that is noop when there aren't any things, so skip it.
+   * They reach the offeratory position at 5 seconds on gameover_clock.
+   */
+  double eye_open_start_time,eye_open_end_time,sweep_start_time,sweep_end_time,msg_start_time;
+  int sweep_dir; // -1=up, 1=down
+  if (g.thingc) {
+    eye_open_start_time=5.0;
+    sweep_dir=-1;
+  } else {
+    eye_open_start_time=1.0;
+    sweep_dir=1;
+  }
+  eye_open_end_time=eye_open_start_time+1.0;
+  sweep_start_time=eye_open_end_time+0.5;
+  sweep_end_time=sweep_start_time+2.0;
+  msg_start_time=sweep_end_time+1.0;
   
-  //TODO After the things have landed, say 6 or 7 seconds on gameover_clock, Vexularg appears and passes judgment.
-  // Needs a word bubble, and graphics for Vexularg.
-  if (g.gameover_clock>=6.0) {
+  /* Eyes.
+   */
+  int eyeopenness=(int)((g.gameover_clock-eye_open_start_time)*5.0)/(eye_open_end_time-eye_open_start_time); // 0=closed .. 5=open
+  if (eyeopenness>0) {
+    if (eyeopenness>5) eyeopenness=5;
+    const int eyew=23;
+    const int eyeh=11;
+    const int leyex=(FBW>>1)-1-eyew;
+    const int reyex=FBW>>1;
+    const int eyey=FBH>>1;
+    // Natural eyeball positions:
+    int lballx=leyex+(eyew>>1)+1;
+    int lbally=eyey+(eyeh>>1)+1;
+    int rballx=reyex+(eyew>>1)+1;
+    int rbally=eyey+(eyeh>>1)+1;
+    // Modify eyeball positions per sweep:
+    double sweept=(g.gameover_clock-sweep_start_time)/(sweep_end_time-sweep_start_time);
+    if ((sweept>0.0)&&(sweept<1.0)) {
+      double nx=sin(sweept*M_PI*2.0);
+      double ny=(cos(sweept*M_PI*2.0)-1.0)/2.0;
+      if (sweep_dir>0) ny=-ny;
+      int dx=(int)(nx*10.0); // horizontal radius
+      int dy=(int)(ny* 4.0); // vertical radius
+      lballx+=dx;
+      lbally+=dy;
+      rballx+=dx;
+      rbally+=dy;
+    }
+    graf_fill_rect(&g.graf,leyex,eyey,eyew,eyeh,0xffffffff);
+    graf_fill_rect(&g.graf,reyex,eyey,eyew,eyeh,0xffffffff);
+    graf_set_input(&g.graf,g.texid_sprites);
+    graf_tile(&g.graf,lballx,lbally,0x7f,0);
+    graf_tile(&g.graf,rballx,rbally,0x7f,0);
+    graf_decal(&g.graf,leyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+    graf_decal(&g.graf,reyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+  }
+
+  /* The final judgment, revealed after a tasteful interval.
+   */
+  if (g.gameover_clock>=msg_start_time) {
     graf_set_input(&g.graf,g.texid_judgment);
     graf_set_tint(&g.graf,0xffffffff);
-    graf_decal(&g.graf,(FBW>>1)-(g.judgmentw>>1),(FBH>>1)-(g.judgmenth>>1),0,0,g.judgmentw,g.judgmenth);
+    int dsty=(FBH>>1)+20-(g.judgmenth>>1);
+    graf_decal(&g.graf,(FBW>>1)-(g.judgmentw>>1),dsty,0,0,g.judgmentw,g.judgmenth);
     graf_set_tint(&g.graf,0);
   }
 }

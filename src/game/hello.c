@@ -7,7 +7,7 @@ void hello_begin() {
   g.hello_running=1;
   g.gameover_running=0;
   g.modal_blackout=0.500;
-  //TODO song
+  song(RID_song_unto_thee);//TODO song
 }
 
 /* Update.
