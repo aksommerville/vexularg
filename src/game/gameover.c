@@ -12,7 +12,7 @@ void gameover_begin() {
   g.gameover_clock=0.0;
   
   // Music stops as the suspense builds...
-  song(0);
+  song(0,0);
   
   /* Put the hero sprite in her initial position, and tell the camera to cut.
    * Note the bounds of the offeratorium.
@@ -123,7 +123,7 @@ void gameover_update(double elapsed) {
   double musictime=g.thingc?9.5:5.5;
   if ((g.gameover_clock>=musictime)&&(pvclock<musictime)) {
     if (g.score>=NS_score_ok) {
-      song(RID_song_shave_and_a_haircut);
+      song(RID_song_shave_and_a_haircut,0);
     } else {
       song(RID_song_inadequate_offering,0);
     }
