@@ -51,7 +51,7 @@ static int _moon_init(struct sprite *sprite) {
   SPRITE->texid=font_render_to_texture(0,g.font,spell_of_summoning,sizeof(spell_of_summoning)-1,DLOG_INNER_W,2048,0x000000ff);
   egg_texture_get_size(&SPRITE->texw,&SPRITE->texh,SPRITE->texid);
   SPRITE->scroll=-DLOG_INNER_H;
-  SPRITE->startclock=5.0;
+  SPRITE->startclock=2.0;
   return 0;
 }
 

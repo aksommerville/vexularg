@@ -90,6 +90,17 @@ static void hero_pickup_or_drop(struct sprite *sprite) {
   sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
 }
 
+// Drop pumpkin for gameover. Don't require a valid position and don't make a sound.
+void sprite_hero_force_drop(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_hero)) return;
+  if (!SPRITE->pumpkin) return;
+  SPRITE->pumpkin->x=sprite->x+1.0;
+  SPRITE->pumpkin->y=sprite->y-0.5;
+  sprite_list(SPRITE->pumpkin);
+  SPRITE->pumpkin=0;
+  SPRITE->pumpkin_role=NS_role_inert;
+}
+
 /* Test for down-jump.
  * We'll do it the easy way: Cheat our position down by one smidgeon, then try a regular move down, then reset position.
  */
@@ -124,6 +135,16 @@ static void hero_land_roughly(struct sprite *sprite) {
  */
  
 static void _hero_update(struct sprite *sprite,double elapsed) {
+
+  /* If gameover, nullify everything and get out.
+   * gameover_begin() must take care of our pumpkin. If it didn't, leave it be.
+   */
+  if (g.gameover_running) {
+    SPRITE->walking=0;
+    SPRITE->falling=0;
+    SPRITE->animframe=0;
+    return;
+  }
 
   /* Walk left and right.
    */

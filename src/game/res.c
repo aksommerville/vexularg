@@ -1,5 +1,23 @@
 #include "vexularg.h"
 
+/* Load a sprite resource and check its type.
+ */
+ 
+static int sprite_id_is_thing(int rid) {
+  const void *serial=0;
+  int serialc=res_get(&serial,EGG_TID_sprite,rid);
+  struct cmdlist_reader reader;
+  if (sprite_reader_init(&reader,serial,serialc)<0) return 0;
+  struct cmdlist_entry cmd;
+  while (cmdlist_reader_next(&cmd,&reader)>0) {
+    if (cmd.opcode==CMD_sprite_type) {
+      int sprtype=(cmd.arg[0]<<8)|cmd.arg[1];
+      return (sprtype==NS_sprtype_thing)?1:0;
+    }
+  }
+  return 0;
+}
+
 /* Receive the one tilesheet.
  */
  
@@ -104,6 +122,23 @@ int res_init() {
   }
   if ((g.mapw*NS_sys_tilesize<FBW)||(g.maph*NS_sys_tilesize<FBH)) {
     fprintf(stderr,"Map must cover the %dx%d framebuffer. Have %dx%d of %d-pixel tiles. Make it bigger.\n",FBW,FBH,g.mapw,g.maph,NS_sys_tilesize);
+    return -1;
+  }
+  
+  /* Read the map commands again to count things.
+   * We are doing it the correct way, at terrible cost: Read every sprite resource for every spawn point to check its type.
+   * We can't do this until sprites are loaded, and they're after maps.
+   */
+  g.thingc_total=0;
+  struct cmdlist_reader mreader={.v=g.mapcmd,.c=g.mapcmdc};
+  struct cmdlist_entry mcmd;
+  while (cmdlist_reader_next(&mcmd,&mreader)>0) {
+    switch (mcmd.opcode) {
+      case CMD_map_sprite: if (sprite_id_is_thing((mcmd.arg[2]<<8)|mcmd.arg[3])) g.thingc_total++; break;
+    }
+  }
+  if ((g.thingc_total<1)||(g.thingc_total>THING_LIMIT)) {
+    fprintf(stderr,"Map must contain 1..%d things, found %d.\n",THING_LIMIT,g.thingc_total);
     return -1;
   }
   

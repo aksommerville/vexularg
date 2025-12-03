@@ -57,7 +57,7 @@
 image image:terrain
 sprite @44,31 sprite:hero (u32)0
 sprite @55,31 sprite:moon (u32)0
-camlock @40,22,20,11
+camlock @40,22,20,11 (u8:camlock)offeratorium 0x000000
 sprite @32,32 sprite:marshmallow (u32)0
 sprite @11,53 sprite:fish (u32)0
 sprite @28,53 sprite:tomato (u32)0

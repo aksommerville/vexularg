@@ -6,6 +6,7 @@
 void hello_begin() {
   g.hello_running=1;
   g.gameover_running=0;
+  g.modal_blackout=0.500;
   //TODO song
 }
 
@@ -13,8 +14,12 @@ void hello_begin() {
  */
  
 void hello_update(double elapsed) {
-  if ((g.input&EGG_BTN_SOUTH)&&!(g.pvinput&EGG_BTN_SOUTH)) {
-    scene_reset();
+  if (g.modal_blackout>0.0) {
+    g.modal_blackout-=elapsed;
+  } else {
+    if ((g.input&EGG_BTN_SOUTH)&&!(g.pvinput&EGG_BTN_SOUTH)) {
+      scene_reset();
+    }
   }
 }
 

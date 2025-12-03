@@ -80,6 +80,8 @@ FOR_EACH_SPRTYPE
 
 const struct sprite_type *sprite_type_from_id(int id);
 
+void sprite_hero_force_drop(struct sprite *sprite);
+
 int sprite_thing_get_carried(struct sprite *sprite,struct sprite *hero);
 int sprite_thing_get_dropped(struct sprite *sprite,struct sprite *hero);
 int sprite_thing_get_role(const struct sprite *sprite);

@@ -44,12 +44,15 @@ void egg_client_update(double elapsed) {
   g.input=egg_input_get_one(0);
   
   if (0) { // XXX Run the clock fast until close to expiry, for testing the spell's timing.
-    if (g.time_remaining>=10.0) elapsed*=10.0;
+    if (g.time_remaining>=5.0) elapsed*=20.0;
   }
   
-  if (g.hello_running) hello_update(elapsed);
-  else if (g.gameover_running) gameover_update(elapsed);
-  else scene_update(elapsed);
+  if (g.hello_running) {
+    hello_update(elapsed);
+  } else {
+    scene_update(elapsed);
+    if (g.gameover_running) gameover_update(elapsed);
+  }
 }
 
 /* Render.
@@ -57,9 +60,12 @@ void egg_client_update(double elapsed) {
 
 void egg_client_render() {
   graf_reset(&g.graf);
-  if (g.hello_running) hello_render();
-  else if (g.gameover_running) gameover_render();
-  else scene_render();
+  if (g.hello_running) {
+    hello_render();
+  } else {
+    scene_render();
+    if (g.gameover_running) gameover_render();
+  }
   graf_flush(&g.graf);
 }
 

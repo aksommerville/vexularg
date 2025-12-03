@@ -77,8 +77,10 @@ void scene_update(double elapsed) {
   
   /* Tick the master clock and end the game when it expires.
    */
-  if ((g.time_remaining-=elapsed)<=0.0) {
-    gameover_begin();
+  if (!g.gameover_running) {
+    if ((g.time_remaining-=elapsed)<=0.0) {
+      gameover_begin();
+    }
   }
 }
 
@@ -223,26 +225,30 @@ void scene_render() {
     }
   }
   
-  /* Time remaining, upper-right corner.
-   * These use the sprites texture, which is already active.
-   */
-  int ms=(int)(g.time_remaining*1000.0);
-  if (ms<0) ms=0;
-  int sec=ms/1000; ms%=1000;
-  int min=sec/60; sec%=60;
-  if (min>9) { min=9; sec=99; ms=999; }
-  graf_tile(&g.graf,FBW-3,4,0x70+sec%10,0);
-  graf_tile(&g.graf,FBW-7,4,0x70+sec/10,0);
-  if (!ms||(ms>=200)) graf_tile(&g.graf,FBW-10,4,0x7a,0);
-  graf_tile(&g.graf,FBW-13,4,0x70+min,0);
+  // Clock only before gameover. We do continue running during gameover.
+  if (!g.gameover_running) {
   
-  /* Extra blinking "Hurry!" message when time is short.
-   * Ensure its phase is such that nothing renders at ms==0.
-   */
-  if (!min&&(sec<=20)&&(ms>=300)) {
-    graf_tile(&g.graf,FBW-21,4,0x7e,0);
-    graf_tile(&g.graf,FBW-29,4,0x7d,0);
-    graf_tile(&g.graf,FBW-37,4,0x7c,0);
-    graf_tile(&g.graf,FBW-45,4,0x7b,0);
+    /* Time remaining, upper-right corner.
+     * These use the sprites texture, which is already active.
+     */
+    int ms=(int)(g.time_remaining*1000.0);
+    if (ms<0) ms=0;
+    int sec=ms/1000; ms%=1000;
+    int min=sec/60; sec%=60;
+    if (min>9) { min=9; sec=99; ms=999; }
+    graf_tile(&g.graf,FBW-3,4,0x70+sec%10,0);
+    graf_tile(&g.graf,FBW-7,4,0x70+sec/10,0);
+    if (!ms||(ms>=200)) graf_tile(&g.graf,FBW-10,4,0x7a,0);
+    graf_tile(&g.graf,FBW-13,4,0x70+min,0);
+  
+    /* Extra blinking "Hurry!" message when time is short.
+     * Ensure its phase is such that nothing renders at ms==0.
+     */
+    if (!min&&(sec<=20)&&(ms>=300)) {
+      graf_tile(&g.graf,FBW-21,4,0x7e,0);
+      graf_tile(&g.graf,FBW-29,4,0x7d,0);
+      graf_tile(&g.graf,FBW-37,4,0x7c,0);
+      graf_tile(&g.graf,FBW-45,4,0x7b,0);
+    }
   }
 }

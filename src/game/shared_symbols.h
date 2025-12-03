@@ -12,9 +12,9 @@
 #define NS_sys_bgcolor 0x000000
 
 #define CMD_map_image     0x20 /* u16:imageid */
-#define CMD_map_camlock   0x40 /* u16:position, u16:size(20,11) */
 #define CMD_map_sprite    0x61 /* u16:position, u16:spriteid, u32:arg */
 #define CMD_map_door      0x62 /* u16:position, u16:mapid, u16:dstposition, u16:arg */
+#define CMD_map_camlock   0x63 /* u16:position, u16:size(20,11), u8:identifier, u24:reserved */
 
 #define CMD_sprite_solid 0x01 /* --- */
 #define CMD_sprite_attractable 0x02 /* --- */
@@ -39,6 +39,14 @@
 #define NS_role_magnet 2
 #define NS_role_fan 3
 #define NS_role_balloon 4
+
+#define NS_camlock_offeratorium 1
+
+#define NS_score_none           0 /* No offering was made. Wrath! */
+#define NS_score_no_marshmallow 1 /* Invalid. */
+#define NS_score_no_fish        2 /* Invalid. */
+#define NS_score_ok             3 /* Valid but not perfect. */
+#define NS_score_perfect        4 /* All the things. */
 
 // Editor uses the comment after a 'sprtype' symbol as a prompt in the new-sprite modal.
 // Should match everything after 'spriteid' in the CMD_map_sprite args.

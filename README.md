@@ -35,6 +35,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [ ] Final maps.
 - [ ] Final timing. First pick a duration based on the map. Must be difficult but possible to collect all the things. Then tune Moon Song to fit.
 - - In the test map with a 2:00 limit, I can only get 7/8 items, and that's a stretch.
+- - ...actually, can get all 8. But again, a stretch.
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
 - [ ] Music.
 - [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.

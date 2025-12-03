@@ -15,6 +15,7 @@
 
 #define SOUND_BLACKOUT_LIMIT 32
 #define CAMLOCK_LIMIT 4 /* There will probably be just one. */
+#define THING_LIMIT 16
 
 extern struct g {
 
@@ -32,9 +33,23 @@ extern struct g {
   
   // hello modal
   int hello_running;
+  double modal_blackout;
   
-  // gameover modal
+  /* gameover.
+   * At first this was going to be an independent modal, but better to treat it as a state of the scene.
+   * Scene continues running during gameover, but a lot of stuff gets stubbed out.
+   */
   int gameover_running;
+  struct thing {
+    struct sprite *sprite; // WEAK.
+    double ax,ay,zx,zy; // Initial position, and levitated offering position.
+    int role;
+  } thingv[THING_LIMIT];
+  int thingc;
+  double gameover_clock;
+  int score; // Calculated at gameover_begin.
+  int texid_judgment; // Vexularg's text at gameover.
+  int judgmentw,judgmenth;
   
   const uint8_t *cellv;
   int mapw,maph; // Dimensions are not fixed at build time, tho they could be. Treat them as dynamic.
@@ -46,6 +61,7 @@ extern struct g {
   struct camlock { uint8_t x,y,w,h; } camlockv[CAMLOCK_LIMIT];
   int camlockc;
   double time_remaining;
+  int thingc_total; // Tabulated during res_init, the largest possible offering.
   
   struct sprite **spritev;
   int spritec,spritea;

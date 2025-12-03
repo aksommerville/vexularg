@@ -129,18 +129,20 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
           sprite->tileid++;
           if (sprite->tileid>=SPRITE->tileid0+5) sprite->tileid=SPRITE->tileid0;
         }
+        if (g.gameover_running) break;
         if (SPRITE->ratelimit>0.0) SPRITE->ratelimit-=elapsed;
         else if (!thing_update_fan_or_magnet(sprite,elapsed,1.0)) SPRITE->ratelimit=0.250;
       } break;
       
     // Magnet is the opposite of fan.
     case NS_role_magnet: {
+        if (g.gameover_running) break;
         if (SPRITE->ratelimit>0.0) SPRITE->ratelimit-=elapsed;
         else if (!thing_update_fan_or_magnet(sprite,elapsed,-1.0)) SPRITE->ratelimit=0.250;
       } break;
       
     // Balloon diminishes gravity and enhances jump -- hero takes care of that. When left alone, we slowly rise.
-    case NS_role_balloon: if (!SPRITE->carried) {
+    case NS_role_balloon: if (!SPRITE->carried&&!g.gameover_running) {
         sprite_move(sprite,0.0,-1.500*elapsed);
       } break;
     
@@ -154,6 +156,10 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
         }
       } break;
   }
+  
+  /* During gameover, we do nothing but animate, so we're done.
+   */
+  if (g.gameover_running) return;
   
   /* If we're being carried, bind to the hero's edge.
    * The ongoing activities above do keep happening during the carry.
