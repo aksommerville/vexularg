@@ -34,6 +34,8 @@ extern struct g {
   // hello modal
   int hello_running;
   double modal_blackout;
+  int texid_title;
+  int titlew,titleh;
   
   /* gameover.
    * At first this was going to be an independent modal, but better to treat it as a state of the scene.

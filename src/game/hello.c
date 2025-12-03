@@ -7,7 +7,14 @@ void hello_begin() {
   g.hello_running=1;
   g.gameover_running=0;
   g.modal_blackout=0.500;
-  song(RID_song_unto_thee);//TODO song
+  
+  if (!g.texid_title) {
+    g.texid_title=egg_texture_new();
+    egg_texture_load_image(g.texid_title,RID_image_title);
+    egg_texture_get_size(&g.titlew,&g.titleh,g.texid_title);
+  }
+  
+  song(RID_song_eternal_torment);//TODO song -- eternal_torment is an oldie, not written for this jam
 }
 
 /* Update.
@@ -27,5 +34,7 @@ void hello_update(double elapsed) {
  */
  
 void hello_render() {
-  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x008000ff);
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
+  graf_set_input(&g.graf,g.texid_title);
+  graf_decal(&g.graf,(FBW>>1)-(g.titlew>>1),10,0,0,g.titlew,g.titleh);
 }
