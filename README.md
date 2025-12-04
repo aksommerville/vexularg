@@ -39,7 +39,7 @@ Vertical jump is 4 meters normally, 6 with a balloon. 9 from the trampoline but 
 - [ ] Reconsider hazards. We'll have plenty of time for dev, and it could add some interesting play.
 - [ ] Moving platforms?
 - [ ] Final maps.
-- - [ ] Try putting fish and marshmallow on islands with a horizontal line of sight, so any active item can get them, but you can't on your own.
+- - [x] Try putting fish and marshmallow on islands with a horizontal line of sight, so any active item can get them, but you can't on your own.
 - [ ] Final timing. First pick a duration based on the map. Must be difficult but possible to collect all the things. Then tune Moon Song to fit.
 - - In the test map with a 2:00 limit, I can only get 7/8 items, and that's a stretch.
 - - ...actually, can get all 8. But again, a stretch.
@@ -55,6 +55,7 @@ Vertical jump is 4 meters normally, 6 with a balloon. 9 from the trampoline but 
 - [ ] Coyote time.
 - [ ] Landing dust.
 - [x] After a perfect score, make Dot and Moon bounce up and down with hearts above their heads.
+- [ ] Scorekeeping. We could track Moon's false time and add that to the things score, to make speed count.
 
 ## Post-Jam
 
