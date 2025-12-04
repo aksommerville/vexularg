@@ -14,6 +14,7 @@
 #define TRAMPOLINE_RATE    2.000 /* m/s per meter of fall before */
 #define TRAMPOLINE_AUGMENT 2.000 /* Multiplier, if you're holding jump. */
 #define JUMP_LIMIT        30.000 /* m/s, maximum initial jump rate off trampoline. */
+#define DOWN_JUMP_CHEAT 0.002 /* m. Amount to fudge on (y) to test and escape oneways downward. Beware! 0.001 is not enough to avoid all rounding errors. */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -108,8 +109,8 @@ void sprite_hero_force_drop(struct sprite *sprite) {
  
 static int hero_can_down_jump(struct sprite *sprite) {
   double y0=sprite->y;
-  sprite->y+=0.001;
-  int result=sprite_move(sprite,0.0,0.001);
+  sprite->y+=DOWN_JUMP_CHEAT;
+  int result=sprite_move(sprite,0.0,DOWN_JUMP_CHEAT);
   sprite->y=y0;
   return result;
 }
@@ -226,7 +227,7 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
     } else if (g.input&EGG_BTN_DOWN) { // Begin down-jump.
       if (hero_can_down_jump(sprite)) {
         sfx_spatial(RID_sound_downjump,sprite->x,sprite->y);
-        sprite->y+=0.001; // Cheat down to escape the platform.
+        sprite->y+=DOWN_JUMP_CHEAT; // Cheat down to escape the platform.
         SPRITE->falling=1;
         SPRITE->gravity=GRAVITY_INITIAL;
         SPRITE->gravity_y0=sprite->y;

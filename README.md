@@ -25,7 +25,7 @@ Vertical jump is 4 meters normally, 6 with a balloon. 9 from the trampoline but 
 
 ## TODO
 
-- [ ] Down jumps sometimes reject, seemingly random. Noticing only on row 16, maybe it's some float round-off thing.
+- [x] Down jumps sometimes reject, seemingly random. Noticing only on row 16, maybe it's some float round-off thing.
 - [ ] Skip to end. Maybe hold B when facing Moon, and she chants faster (change time_remaining accordingly).
 - [x] Make the universal menu disablable, and disable it. We can't control its use of color.
 - [x] Map loader.
