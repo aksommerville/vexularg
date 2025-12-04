@@ -15,6 +15,8 @@
 #define TRAMPOLINE_AUGMENT 2.000 /* Multiplier, if you're holding jump. */
 #define JUMP_LIMIT        32.000 /* m/s, maximum initial jump rate off trampoline. */
 #define DOWN_JUMP_CHEAT 0.002 /* m. Amount to fudge on (y) to test and escape oneways downward. Beware! 0.001 is not enough to avoid all rounding errors. */
+#define PREJUMP_TIME 0.125 /* A little tolerance for pressing A just before landing. */
+#define COYOTE_TIME 0.100 /* Brief period after stepping off an edge when jumping will still work. */
 
 struct sprite_hero {
   struct sprite hdr;
@@ -31,6 +33,7 @@ struct sprite_hero {
   struct sprite *pumpkin; // STRONG and unlisted, if not null.
   int pumpkin_role;
   int celebrate;
+  double time_since_south;
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -153,6 +156,21 @@ static void hero_land_roughly(struct sprite *sprite) {
   sfx_spatial(RID_sound_land_hard,sprite->x,sprite->y);
 }
 
+/* Begin regular jump.
+ */
+ 
+static void hero_begin_jump(struct sprite *sprite) {
+  sfx_spatial(RID_sound_jump,sprite->x,sprite->y);
+  SPRITE->falling=-1;
+  SPRITE->jump_blackout=1;
+  SPRITE->jumppower=JUMP_INITIAL;
+  if (SPRITE->pumpkin_role==NS_role_balloon) {
+    SPRITE->jumpclock=JUMP_TIME_BALLOON;
+  } else {
+    SPRITE->jumpclock=JUMP_TIME;
+  }
+}
+
 /* Update.
  */
  
@@ -188,6 +206,14 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
     SPRITE->animframe=0;
   }
   
+  /* Track strokes of SOUTH for prejump. Actual jump processing is further below.
+   */
+  if ((g.input&EGG_BTN_SOUTH)&&!(g.pvinput&EGG_BTN_SOUTH)) {
+    SPRITE->time_since_south=0.0;
+  } else {
+    SPRITE->time_since_south+=elapsed;
+  }
+  
   /* Advance jump or gravity.
    */
   if (SPRITE->falling<0) {
@@ -195,16 +221,25 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->falling=1;
       SPRITE->gravity=GRAVITY_INITIAL;
       SPRITE->gravity_y0=sprite->y;
+      SPRITE->jump_blackout=1;
+      SPRITE->jumpclock=1.0; // Too high for an accidental coyote.
     } else if ((SPRITE->jumpclock-=elapsed)<=0.0) { // Jump expired.
       SPRITE->falling=1;
       SPRITE->gravity=GRAVITY_INITIAL;
       SPRITE->gravity_y0=sprite->y;
+      SPRITE->jump_blackout=1;
       SPRITE->trampoline=0;
+      SPRITE->jumpclock=1.0; // Too high for an accidental coyote.
     } else { // Continue jumping.
       SPRITE->jumppower-=elapsed*JUMP_DECEL;
       sprite_move(sprite,0.0,-SPRITE->jumppower*elapsed);
     }
   } else if (SPRITE->falling>0) {
+    SPRITE->jumpclock+=elapsed;
+    if ((g.input&EGG_BTN_SOUTH)&&!(g.pvinput&EGG_BTN_SOUTH)&&!SPRITE->jump_blackout&&(SPRITE->jumpclock<COYOTE_TIME)) {
+      hero_begin_jump(sprite);
+      goto _done_jump_;
+    }
     if (SPRITE->pumpkin_role==NS_role_balloon) {
       SPRITE->gravity+=GRAVITY_ACCEL_BALLOON*elapsed;
       if (SPRITE->gravity>GRAVITY_MAX_BALLOON) SPRITE->gravity=GRAVITY_MAX_BALLOON;
@@ -231,6 +266,8 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
         SPRITE->jumpclock=JUMP_TIME;
         SPRITE->jump_blackout=1;
         SPRITE->trampoline=1;
+      } else if ((g.input&EGG_BTN_SOUTH)&&(SPRITE->time_since_south<PREJUMP_TIME)) { // Pressed A a little before landing -- allow the re-jump.
+        hero_begin_jump(sprite);
       } else if ((distance<0.125)||(SPRITE->pumpkin_role==NS_role_balloon)) ; // Nothing for very short drops, might not be a real fall.
       else if (distance<2.0) hero_land_softly(sprite);
       else if (distance<6.0) hero_land_mediumly(sprite);
@@ -241,9 +278,10 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
       SPRITE->falling=1;
       SPRITE->gravity=GRAVITY_INITIAL;
       SPRITE->gravity_y0=sprite->y;
+      SPRITE->jumpclock=0.0;
     } else if (!(g.input&EGG_BTN_SOUTH)) { // Not holding SOUTH. Release the blackout if set.
       SPRITE->jump_blackout=0;
-    } else if (SPRITE->jump_blackout) { // Wait for SOUTH to release before next jump.
+    } else if (SPRITE->jump_blackout||(g.pvinput&EGG_BTN_SOUTH)) { // Wait for SOUTH to release before next jump.
     } else if (g.input&EGG_BTN_DOWN) { // Begin down-jump.
       if (hero_can_down_jump(sprite)) {
         sfx_spatial(RID_sound_downjump,sprite->x,sprite->y);
@@ -256,17 +294,10 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
         sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
       }
     } else { // Begin regular jump.
-      sfx_spatial(RID_sound_jump,sprite->x,sprite->y);
-      SPRITE->falling=-1;
-      SPRITE->jump_blackout=1;
-      SPRITE->jumppower=JUMP_INITIAL;
-      if (SPRITE->pumpkin_role==NS_role_balloon) {
-        SPRITE->jumpclock=JUMP_TIME_BALLOON;
-      } else {
-        SPRITE->jumpclock=JUMP_TIME;
-      }
+      hero_begin_jump(sprite);
     }
   }
+ _done_jump_:;
   
   // Pick up or drop things on WEST.
   if ((g.input&EGG_BTN_WEST)&&!(g.pvinput&EGG_BTN_WEST)) {

@@ -31,9 +31,10 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 - [ ] Moving platforms?
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
 - [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
-- [ ] Coyote time.
+- [x] Coyote time.
 - [ ] Landing dust.
 - [ ] Rather than holding B in front of Moon, can we just do that automatically when we're in the finished state?
+- - To that end, we could have thing track their quantized position and whether they're in the offeratorium. Then would could poll it fast and cheap.
 - [ ] Scorekeeping. We could track Moon's false time and add that to the things score, to make speed count.
 - [ ] Itch page.
 - [ ] Revisit voicing of `2-wrath_of_vexularg`, can I make it crunchier?
