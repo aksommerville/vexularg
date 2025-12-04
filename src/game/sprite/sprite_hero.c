@@ -29,6 +29,7 @@ struct sprite_hero {
   double gravity_y0; // Position at start of falling, so we can compute final force.
   struct sprite *pumpkin; // STRONG and unlisted, if not null.
   int pumpkin_role;
+  int celebrate;
 };
 
 #define SPRITE ((struct sprite_hero*)sprite)
@@ -278,6 +279,13 @@ static void _hero_render(struct sprite *sprite,int dstx,int dsty) {
     case 1: tileid+=1; break;
     case 3: tileid+=2; break;
   }
+  
+  // If celebrating, bounce up and down per global frame count, and show a heart above my head.
+  if (SPRITE->celebrate) {
+    graf_tile(&g.graf,dstx,dsty-NS_sys_tilesize*2-2,0x47,0);
+    if (g.framec%20>=10) dsty--;
+  }
+  
   graf_tile(&g.graf,dstx,dsty-NS_sys_tilesize,tileid,sprite->xform);
   graf_tile(&g.graf,dstx,dsty,tileid+0x10,sprite->xform);
   
@@ -308,3 +316,11 @@ const struct sprite_type sprite_type_hero={
   .update=_hero_update,
   .render=_hero_render,
 };
+
+/* Begin celebration.
+ */
+ 
+void sprite_hero_celebrate(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_hero)) return;
+  SPRITE->celebrate=1;
+}

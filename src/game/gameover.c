@@ -139,6 +139,21 @@ void gameover_update(double elapsed) {
     thing->sprite->x=thing->ax*it+thing->zx*t;
     thing->sprite->y=thing->ay*it+thing->zy*t;
   }
+  
+  // With a perfect score, after 10 seconds, Dot and Moon jump up and down.
+  // Their sprites will manage the activity, we just trigger it.
+  if (g.score>=NS_score_perfect) {
+    double celebrate_time=10.0;
+    if ((pvclock<celebrate_time)&&(g.gameover_clock>=celebrate_time)) {
+      struct sprite **spritep=g.spritev;
+      int i=g.spritec;
+      for (;i-->0;spritep++) {
+        struct sprite *sprite=*spritep;
+        if (sprite->type==&sprite_type_hero) sprite_hero_celebrate(sprite);
+        else if (sprite->type==&sprite_type_moon) sprite_moon_celebrate(sprite);
+      }
+    }
+  }
 }
 
 /* Render.

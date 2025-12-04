@@ -32,6 +32,7 @@ struct sprite_moon {
   double scroll; // px
   double scrollrate; // px/s
   double startclock; // Counts down before chanting.
+  int celebrate;
 };
 
 #define SPRITE ((struct sprite_moon*)sprite)
@@ -85,6 +86,12 @@ static void _moon_update(struct sprite *sprite,double elapsed) {
  */
  
 static void _moon_render(struct sprite *sprite,int dstx,int dsty) {
+  
+  // If celebrating, bounce up and down per global frame count, and show a heart above my head.
+  if (SPRITE->celebrate) {
+    graf_tile(&g.graf,dstx,dsty-NS_sys_tilesize*2-2,0x47,0);
+    if (g.framec%20<10) dsty--;
+  }
 
   // Moon just stands here and chants.
   int chanting;
@@ -152,3 +159,11 @@ const struct sprite_type sprite_type_moon={
   .update=_moon_update,
   .render=_moon_render,
 };
+
+/* Begin celebration.
+ */
+ 
+void sprite_moon_celebrate(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_moon)) return;
+  SPRITE->celebrate=1;
+}

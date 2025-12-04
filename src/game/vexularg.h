@@ -30,6 +30,7 @@ extern struct g {
   int texid_sprites;
   
   int input,pvinput;
+  int framec;
   
   // hello modal
   int hello_running;

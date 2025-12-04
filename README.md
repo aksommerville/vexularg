@@ -47,7 +47,7 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Gameover modal.
 - [ ] Coyote time.
 - [ ] Landing dust.
-- [ ] After a perfect score, make Dot and Moon bounce up and down with hearts above their heads.
+- [x] After a perfect score, make Dot and Moon bounce up and down with hearts above their heads.
 
 ## Post-Jam
 
