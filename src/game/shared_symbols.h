@@ -54,10 +54,12 @@
 #define NS_sprtype_hero 1 /* (u32)0 */
 #define NS_sprtype_moon 2 /* (u32)0 */
 #define NS_sprtype_thing 3 /* (u32)0 */
+#define NS_sprtype_dust 4 /* (u32)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
   _(hero) \
   _(moon) \
-  _(thing)
+  _(thing) \
+  _(dust)
 
 #endif

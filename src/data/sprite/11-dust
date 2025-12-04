@@ -1,0 +1,4 @@
+type (u16:sprtype)dust
+image image:sprites
+tile 0x48 0
+layer (u16)98

@@ -141,7 +141,6 @@ static int hero_can_down_jump(struct sprite *sprite) {
 /* Triggers on hitting the ground.
  * Very low-velocity ground hits do not trigger any of these.
  * A full jump, landing 2m down from the start, is about the threshold for "rough". (6 m)
- * TODO a decorative dust effect would be nice here
  */
  
 static void hero_land_softly(struct sprite *sprite) {
@@ -150,10 +149,13 @@ static void hero_land_softly(struct sprite *sprite) {
  
 static void hero_land_mediumly(struct sprite *sprite) {
   sfx_spatial(RID_sound_land_medium,sprite->x,sprite->y);
+  sprite_spawn(0,sprite->x,sprite->y,0,RID_sprite_dust,0,0);
 }
  
 static void hero_land_roughly(struct sprite *sprite) {
   sfx_spatial(RID_sound_land_hard,sprite->x,sprite->y);
+  sprite_spawn(0,sprite->x,sprite->y,0,RID_sprite_dust,0,0);
+  g.earthquake_time=0.100;
 }
 
 /* Begin regular jump.

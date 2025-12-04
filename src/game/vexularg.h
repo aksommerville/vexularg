@@ -69,6 +69,7 @@ extern struct g {
   int camlockc;
   double time_remaining;
   int thingc_total; // Tabulated during res_init, the largest possible offering.
+  double earthquake_time;
   
   struct sprite **spritev;
   int spritec,spritea;

@@ -39,6 +39,7 @@ int scene_reset() {
   g.time_remaining=180.0;
   g.hello_running=0;
   g.gameover_running=0;
+  g.earthquake_time=0.0;
   
   //XXX During dev, enable this block to end the session fast with the given things moved to the altar.
   if (0) {
@@ -76,6 +77,10 @@ int scene_reset() {
  */
  
 void scene_update(double elapsed) {
+
+  if (g.earthquake_time>0.0) {
+    g.earthquake_time-=elapsed;
+  }
 
   /* Update all sprites that can.
    */
@@ -178,6 +183,7 @@ void scene_render() {
     else if (camerax>worldw-FBW) camerax=worldw-FBW;
     if (cameray<0) cameray=0;
     else if (cameray>worldh-FBH) cameray=worldh-FBH;
+    if (g.earthquake_time>0.0) cameray--; // Earthquakes allow camera to leave the map.
     if (g.camera_cut) { // Cut? Jump immediately to the new target.
       g.camera_cut=0;
       g.camerax=camerax;
