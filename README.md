@@ -42,7 +42,12 @@ One tilesheet for terrain and one for sprites. Try not to need more.
 - [x] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
 - [x] Moon reciting the incantation.
 - [ ] Hello modal.
+- - [ ] Little Dot and Moon with dialogue.
 - [x] Gameover modal.
 - [ ] Coyote time.
 - [ ] Landing dust.
 - [ ] After a perfect score, make Dot and Moon bounce up and down with hearts above their heads.
+
+## Post-Jam
+
+- [ ] Enable menu.

@@ -42,11 +42,11 @@ int scene_reset() {
   
   //XXX During dev, enable this block to end the session fast with the given things moved to the altar.
   if (0) {
-    const int collected[]={};
+    //const int collected[]={};
     //const int collected[]={RID_sprite_fish}; // First invalid case.
     //const int collected[]={RID_sprite_marshmallow}; // Second invalid case.
     //const int collected[]={RID_sprite_marshmallow,RID_sprite_fish}; // Minimum required things.
-    //const int collected[]={RID_sprite_marshmallow,RID_sprite_fish,RID_sprite_teacup,RID_sprite_tomato,RID_sprite_balloon,RID_sprite_trampoline,RID_sprite_fan,RID_sprite_magnet}; // All the things.
+    const int collected[]={RID_sprite_marshmallow,RID_sprite_fish,RID_sprite_teacup,RID_sprite_tomato,RID_sprite_balloon,RID_sprite_trampoline,RID_sprite_fan,RID_sprite_magnet}; // All the things.
     int collectedc=sizeof(collected)/sizeof(int);
     fprintf(stderr,"***** instant end, %d things requested *****\n",collectedc);
     struct sprite **spritep=g.spritev;

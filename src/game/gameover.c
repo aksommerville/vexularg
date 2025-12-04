@@ -152,6 +152,7 @@ void gameover_render() {
    * They reach the offeratory position at 5 seconds on gameover_clock.
    */
   double eye_open_start_time,eye_open_end_time,sweep_start_time,sweep_end_time,msg_start_time;
+  double eye_close_start_time,eye_close_end_time;
   int sweep_dir; // -1=up, 1=down
   if (g.thingc) {
     eye_open_start_time=5.0;
@@ -164,10 +165,17 @@ void gameover_render() {
   sweep_start_time=eye_open_end_time+0.5;
   sweep_end_time=sweep_start_time+2.0;
   msg_start_time=sweep_end_time+1.0;
+  eye_close_start_time=msg_start_time;
+  eye_close_end_time=eye_close_start_time+1.0;
   
   /* Eyes.
    */
-  int eyeopenness=(int)((g.gameover_clock-eye_open_start_time)*5.0)/(eye_open_end_time-eye_open_start_time); // 0=closed .. 5=open
+  int eyeopenness;
+  if ((g.score<NS_score_ok)&&(g.gameover_clock>=eye_close_start_time)) {
+    eyeopenness=(int)((eye_close_end_time-g.gameover_clock)*5.0)/(eye_close_end_time-eye_close_start_time);
+  } else {
+    eyeopenness=(int)((g.gameover_clock-eye_open_start_time)*5.0)/(eye_open_end_time-eye_open_start_time); // 0=closed .. 5=open
+  }
   if (eyeopenness>0) {
     if (eyeopenness>5) eyeopenness=5;
     const int eyew=23;
