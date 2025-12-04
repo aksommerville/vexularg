@@ -37,7 +37,7 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 - - To that end, we could have thing track their quantized position and whether they're in the offeratorium. Then would could poll it fast and cheap.
 - [ ] Scorekeeping. We could track Moon's false time and add that to the things score, to make speed count.
 - [ ] Itch page.
-- [ ] Revisit voicing of `2-wrath_of_vexularg`, can I make it crunchier?
+- [x] Revisit voicing of `2-wrath_of_vexularg`, can I make it crunchier?
 - [x] Is it possible to lose the balloon? ...NO
 - [x] Ground strike velocity is overestimated when dropping off a balloon.
 - [x] What does it take to accidentally lose the collection after triggering acceleration?

@@ -168,6 +168,7 @@ void gameover_render() {
    */
   double eye_open_start_time,eye_open_end_time,sweep_start_time,sweep_end_time,msg_start_time;
   double eye_close_start_time,eye_close_end_time;
+  double wink_start_time,wink_end_time;
   int sweep_dir; // -1=up, 1=down
   if (g.thingc) {
     eye_open_start_time=5.0;
@@ -182,6 +183,8 @@ void gameover_render() {
   msg_start_time=sweep_end_time+1.0;
   eye_close_start_time=msg_start_time;
   eye_close_end_time=eye_close_start_time+1.0;
+  wink_start_time=eye_close_end_time+3.0;
+  wink_end_time=wink_start_time+0.5;
   
   /* Eyes.
    */
@@ -216,13 +219,21 @@ void gameover_render() {
       rballx+=dx;
       rbally+=dy;
     }
-    graf_fill_rect(&g.graf,leyex,eyey,eyew,eyeh,0xffffffff);
-    graf_fill_rect(&g.graf,reyex,eyey,eyew,eyeh,0xffffffff);
-    graf_set_input(&g.graf,g.texid_sprites);
-    graf_tile(&g.graf,lballx,lbally,0x7f,0);
-    graf_tile(&g.graf,rballx,rbally,0x7f,0);
-    graf_decal(&g.graf,leyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
-    graf_decal(&g.graf,reyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+    if ((eyeopenness==5)&&(g.score>=NS_score_perfect)&&(g.gameover_clock>=wink_start_time)&&(g.gameover_clock<wink_end_time)) {
+      // Winking. Draw only the left eye.
+      graf_fill_rect(&g.graf,leyex,eyey,eyew,eyeh,0xffffffff);
+      graf_set_input(&g.graf,g.texid_sprites);
+      graf_tile(&g.graf,lballx,lbally,0x7f,0);
+      graf_decal(&g.graf,leyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+    } else {
+      graf_fill_rect(&g.graf,leyex,eyey,eyew,eyeh,0xffffffff);
+      graf_fill_rect(&g.graf,reyex,eyey,eyew,eyeh,0xffffffff);
+      graf_set_input(&g.graf,g.texid_sprites);
+      graf_tile(&g.graf,lballx,lbally,0x7f,0);
+      graf_tile(&g.graf,rballx,rbally,0x7f,0);
+      graf_decal(&g.graf,leyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+      graf_decal(&g.graf,reyex,eyey,0,119-eyeopenness*eyeh,eyew,eyeh);
+    }
   }
 
   /* The final judgment, revealed after a tasteful interval.
