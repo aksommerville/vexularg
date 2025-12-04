@@ -93,6 +93,13 @@ static struct sprite *hero_find_pumpkin(struct sprite *sprite) {
 static void hero_pickup_or_drop(struct sprite *sprite) {
   if (SPRITE->pumpkin) {
     if (sprite_thing_get_dropped(SPRITE->pumpkin,sprite)) {
+      if (SPRITE->pumpkin_role==NS_role_balloon) {
+        if (SPRITE->falling>0) { // Let go of balloon midair. Reset gravity things.
+          SPRITE->gravity=GRAVITY_INITIAL;
+          SPRITE->gravity_y0=sprite->y;
+          SPRITE->jumpclock=0.0;
+        }
+      }
       sprite_list(SPRITE->pumpkin);
       SPRITE->pumpkin=0;
       SPRITE->pumpkin_role=NS_role_inert;

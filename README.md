@@ -39,6 +39,9 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 - [ ] Itch page.
 - [ ] Revisit voicing of `2-wrath_of_vexularg`, can I make it crunchier?
 - [x] Is it possible to lose the balloon? ...NO
+- [x] Ground strike velocity is overestimated when dropping off a balloon.
+- [x] What does it take to accidentally lose the collection after triggering acceleration?
+- - It's possible. Likeliest way is if you release the balloon thru the ceiling hole. I'm not going to worry about it.
 
 ## Post-Jam
 
