@@ -38,12 +38,13 @@ Vertical jump is 4 meters normally, 6 with a balloon. 9 from the trampoline but 
 - - [x] What happens when you get hurt?
 - [ ] Reconsider hazards. We'll have plenty of time for dev, and it could add some interesting play.
 - [ ] Moving platforms?
-- [ ] Final maps.
+- [x] Final maps.
 - - [x] Try putting fish and marshmallow on islands with a horizontal line of sight, so any active item can get them, but you can't on your own.
 - [ ] Final timing. First pick a duration based on the map. Must be difficult but possible to collect all the things. Then tune Moon Song to fit.
 - - In the test map with a 2:00 limit, I can only get 7/8 items, and that's a stretch.
 - - ...actually, can get all 8. But again, a stretch.
 - - [x] Change Moon Song to select a scroll speed dynamically and fit the available time exactly.
+- [ ] Make pickup a little more tolerant, esp for cases where you grab a thing mid-jump.
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
 - [x] Music: hello, success, failure.
 - [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
