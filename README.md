@@ -21,45 +21,40 @@ Single list of live sprites, which we'll iterate the whole thing a lot. It's OK.
 
 One tilesheet for terrain and one for sprites. Try not to need more.
 
-Vertical jump is 4 meters normally, 6 with a balloon. 9 from the trampoline but it's a stretch, avoid 9-meter walls.
+Vertical jump is 4 meters normally, 6 with a balloon.
+
+https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 
 ## TODO
 
-- [x] Down jumps sometimes reject, seemingly random. Noticing only on row 16, maybe it's some float round-off thing.
-- [x] Skip to end. Maybe hold B when facing Moon, and she chants faster (change time_remaining accordingly).
-- [x] Make the universal menu disablable, and disable it. We can't control its use of color.
-- [x] Map loader.
-- [x] Sprite loader.
-- [x] Hero sprite. Motion etc.
-- [x] Camera lock.
-- [x] Carry things.
-- [x] Active things.
-- [x] Hazards. ...NO. No danger, it's a friendly kind of game.
-- - [x] What happens when you get hurt?
 - [ ] Reconsider hazards. We'll have plenty of time for dev, and it could add some interesting play.
 - [ ] Moving platforms?
-- [x] Final maps.
-- - [x] Try putting fish and marshmallow on islands with a horizontal line of sight, so any active item can get them, but you can't on your own.
-- [x] Final timing. First pick a duration based on the map. Must be difficult but possible to collect all the things. Then tune Moon Song to fit.
-- - In the test map with a 2:00 limit, I can only get 7/8 items, and that's a stretch.
-- - ...actually, can get all 8. But again, a stretch.
-- - [x] Change Moon Song to select a scroll speed dynamically and fit the available time exactly.
-- - 3:00. I don't think anyone will beat that first try, but second try is easy.
-- - And once familiar with the map, it's stupid easy to complete in 3:00, I can even do 2:00 at a stretch. (easy is good)
-- [x] Make pickup a little more tolerant, esp for cases where you grab a thing mid-jump.
 - [ ] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
-- [x] Music: hello, success, failure.
 - [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
-- [x] Session clock. Count down. "2 minutes to recite this incantation, collect the offering before that!"
-- [x] Moon reciting the incantation.
-- [x] Hello modal.
-- - [x] Little Dot and Moon with dialogue.
-- [x] Gameover modal.
 - [ ] Coyote time.
 - [ ] Landing dust.
-- [x] After a perfect score, make Dot and Moon bounce up and down with hearts above their heads.
+- [ ] Rather than holding B in front of Moon, can we just do that automatically when we're in the finished state?
 - [ ] Scorekeeping. We could track Moon's false time and add that to the things score, to make speed count.
+- [ ] Itch page.
+- [ ] Revisit voicing of `2-wrath_of_vexularg`, can I make it crunchier?
+- [x] Is it possible to lose the balloon? ...NO
 
 ## Post-Jam
 
 - [ ] Enable menu.
+- [ ] Color graphics?
+
+## Notes for the player
+
+Include these in the Itch page.
+
+- There are eight offerable things. All eight are required, to get the best ending.
+- You don't need to be in the altar room when time runs out.
+- If you're carrying a thing when time runs out, it's included in the offering, even if away from the altar.
+- Things only need to be in the altar room; sitting on the altar itself is not necessary.
+- The fan and the magnet repel or attract you while you hold them, if you pick them up by the business end.
+- Fan and magnet will only operate on one thing at a time. Others behind that thing are not affected.
+- Fan and magnet don't work through walls.
+- It's not possible to lose the balloon. Though in some positions, it's very difficult to recover.
+- The balloon will stop rising if you put something, or yourself, on top of it.
+- No state is irreversible. No matter what you've done, if there's enough time, you can undo it.

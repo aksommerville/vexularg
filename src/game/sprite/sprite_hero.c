@@ -80,7 +80,6 @@ static struct sprite *hero_find_pumpkin(struct sprite *sprite) {
       if ((dy>=-0.5)&&(dy<=0.5)) upper=other;
     }
   }
-  if (upper) fprintf(stderr,"%s:%d: %d caught pumpkin on the second chance\n",__FILE__,__LINE__,g.framec);
   return upper;
 }
 
