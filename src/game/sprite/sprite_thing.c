@@ -10,6 +10,8 @@ struct sprite_thing {
   int carried;
   int same_direction; // While (carried), nonzero means our xform should be the same as the hero's.
   double ratelimit; // Clock that runs when fan or magnet strikes nothing, so we don't spin too much wheel.
+  int qx,qy; // Quantized position.
+  int in_offeratorium;
 };
 
 #define SPRITE ((struct sprite_thing*)sprite)
@@ -116,6 +118,23 @@ static int thing_update_fan_or_magnet(struct sprite *sprite,double elapsed,doubl
   return 1;
 }
 
+/* Check offeratorium.
+ */
+ 
+static int cell_in_offeratorium(int x,int y) {
+  const struct camlock *camlock=g.camlockv;
+  int i=g.camlockc;
+  for (;i-->0;camlock++) {
+    if (camlock->id!=NS_camlock_offeratorium) continue;
+    if (x<camlock->x) return 0;
+    if (y<camlock->y) return 0;
+    if (x>=camlock->x+camlock->w) return 0;
+    if (y>=camlock->y+camlock->h) return 0;
+    return 1;
+  }
+  return 0;
+}
+
 /* Update.
  */
  
@@ -125,7 +144,7 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
     // Fan animates and blows other sprites away, along the horizontal line of sight.
     case NS_role_fan: {
         if ((SPRITE->animclock-=elapsed)<=0.0) {
-          SPRITE->animclock+=0.0875;
+          if ((SPRITE->animclock+=0.0875)<0.0) SPRITE->animclock=0.0;
           sprite->tileid++;
           if (sprite->tileid>=SPRITE->tileid0+5) sprite->tileid=SPRITE->tileid0;
         }
@@ -149,7 +168,7 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
     // Trampoline makes the hero bounce when she lands on us -- hero takes care of that. But we need to animate the interaction.
     case NS_role_trampoline: {
         if (SPRITE->animclock>0.0) {
-          SPRITE->animclock-=elapsed;
+          if ((SPRITE->animclock-=elapsed)<0.0) SPRITE->animclock=0.0;
           sprite->tileid=SPRITE->tileid0+(((int)(SPRITE->animclock*8.0))&1);
         } else {
           sprite->tileid=SPRITE->tileid0;
@@ -160,6 +179,20 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
   /* During gameover, we do nothing but animate, so we're done.
    */
   if (g.gameover_running) return;
+  
+  /* Take my quantized position, and if it changed, recheck whether I'm in the offeratorium.
+   * Then if we are not in it, clear the global collector.
+   */
+  int qx=(int)sprite->x;
+  int qy=(int)sprite->y;
+  if ((qx!=SPRITE->qx)||(qy!=SPRITE->qy)) {
+    SPRITE->qx=qx;
+    SPRITE->qy=qy;
+    SPRITE->in_offeratorium=cell_in_offeratorium(qx,qy);
+  }
+  if (!SPRITE->in_offeratorium) {
+    g.all_things_in_offeratorium=0;
+  }
   
   /* If we're being carried, bind to the hero's edge.
    * The ongoing activities above do keep happening during the carry.

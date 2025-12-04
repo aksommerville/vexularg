@@ -81,6 +81,11 @@ void scene_update(double elapsed) {
   if (g.earthquake_time>0.0) {
     g.earthquake_time-=elapsed;
   }
+  double adjusted_elapsed=elapsed;
+  if (g.all_things_in_offeratorium&&!g.gameover_running) {
+    adjusted_elapsed*=20.0;
+  }
+  g.all_things_in_offeratorium=1;
 
   /* Update all sprites that can.
    */
@@ -89,7 +94,8 @@ void scene_update(double elapsed) {
     struct sprite *sprite=g.spritev[i];
     if (sprite->defunct) continue;
     if (!sprite->type->update) continue;
-    sprite->type->update(sprite,elapsed);
+    if (sprite->type==&sprite_type_hero) sprite->type->update(sprite,elapsed);
+    else sprite->type->update(sprite,adjusted_elapsed);
   }
   
   /* Drop defunct sprites.
@@ -112,7 +118,7 @@ void scene_update(double elapsed) {
   /* Tick the master clock and end the game when it expires.
    */
   if (!g.gameover_running) {
-    if ((g.time_remaining-=elapsed)<=0.0) {
+    if ((g.time_remaining-=adjusted_elapsed)<=0.0) {
       gameover_begin();
     }
   }

@@ -28,6 +28,18 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
   else if (dy>0.0) dir=0x02;
   else return 0;
   
+  /* There can be ridiculously long moves when the end-game acceleration is in play.
+   * Under those conditions, we don't really care about any movement, the game's already over.
+   * If we ever get something suspiciously long, clamp it.
+   */
+  const double way_long=0.499;
+  switch (dir) {
+    case 0x40: if (dy<-way_long) dy=-way_long; break;
+    case 0x10: if (dx<-way_long) dx=-way_long; break;
+    case 0x08: if (dx>way_long) dx=way_long; break;
+    case 0x02: if (dy>way_long) dy=way_long; break;
+  }
+  
   // Select the new position and bounds around it.
   double nx=sprite->x+dx;
   double ny=sprite->y+dy;

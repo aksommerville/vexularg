@@ -56,6 +56,7 @@ static int res_welcome_map(const void *src,int srcc) {
             camlock->y=cmd.arg[1];
             camlock->w=cmd.arg[2];
             camlock->h=cmd.arg[3];
+            camlock->id=cmd.arg[4];
           }
         } break;
 

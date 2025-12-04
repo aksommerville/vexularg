@@ -65,11 +65,12 @@ extern struct g {
   uint8_t physics[256]; // Single tilesheet, we load it just once.
   int camerax,cameray;
   int camera_cut; // If nonzero, next camera update will go immediately to its target.
-  struct camlock { uint8_t x,y,w,h; } camlockv[CAMLOCK_LIMIT];
+  struct camlock { uint8_t x,y,w,h,id; } camlockv[CAMLOCK_LIMIT];
   int camlockc;
   double time_remaining;
   int thingc_total; // Tabulated during res_init, the largest possible offering.
   double earthquake_time;
+  int all_things_in_offeratorium; // thing sprites set this false every update if they're outside.
   
   struct sprite **spritev;
   int spritec,spritea;
