@@ -10,20 +10,18 @@
 #define DLOG_INNER_W (DLOG_COLC*NS_sys_tilesize-DLOG_MARGIN_X*2)
 #define DLOG_INNER_H (DLOG_ROWC*NS_sys_tilesize-DLOG_MARGIN_Y*2)
 
-#define SCROLL_RATE 4.0 /* px/s */
-
 // At SCROLL_RATE=4 and DLOG_COLC=7, this text is just within the 2048-pixel limit, and takes about 102 seconds to play out.
 // That's the low end that I might want for global time. We can tweak SCROLL_RATE to suit. 2.0 is ok, so is 6.0, and fractions are no problem.
 static const char spell_of_summoning[]=
-  "Zon yoom ollix. Intex fannel wreng knogh. Lux pefta gar o scunnia mewdle. "
+  "Vexularg, zon yoom ollix. Intex fannel wreng knogh. Lux pefta gar o scunnia mewdle. "
   "O aru ferrinum lasus nargoplex umbria hal yoom pax. Moop hex illius. "
   "Twint tallia nan octrum aru o intex. Twint yoom wreng yallimus gar. Braphus hal quenna. "
   "Jep ferrinum hal wumple leffimer tallia pefta torph yoom nargoplex geppina hoccet biliar. "
-  "Cep wook wumple relifi knogh gar umbria ex ollix. Quish rit umbria nan lux. ONE "
+  "Cep wook wumple relifi knogh gar umbria ex ollix. Quish rit umbria nan lux. "
   "Ept romma durgh wumple lux. Tem ir gelft relifi yit bem aps kipple tallia xa umbria. "
   "Durgh crym wreng moop romma si pax relifi bem. Illius twint marph ferrinum. "
   "Flam kwn xeff mu nan quenna si urqualle gelft braphus octrum. "
-  "Hal pax sluph geppina yallimus yoom de. Que lenta octrum wumple elliani."
+  "Hal pax sluph geppina yallimus yoom de. Que lenta octrum wumple elliani Vexularg."
 "";
 
 struct sprite_moon {
@@ -32,6 +30,7 @@ struct sprite_moon {
   int animframe;
   int texid,texw,texh;
   double scroll; // px
+  double scrollrate; // px/s
   double startclock; // Counts down before chanting.
 };
 
@@ -51,7 +50,7 @@ static int _moon_init(struct sprite *sprite) {
   SPRITE->texid=font_render_to_texture(0,g.font,spell_of_summoning,sizeof(spell_of_summoning)-1,DLOG_INNER_W,2048,0x000000ff);
   egg_texture_get_size(&SPRITE->texw,&SPRITE->texh,SPRITE->texid);
   SPRITE->scroll=-DLOG_INNER_H;
-  SPRITE->startclock=2.0;
+  SPRITE->startclock=1.0;
   return 0;
 }
 
@@ -59,12 +58,24 @@ static int _moon_init(struct sprite *sprite) {
  */
  
 static void _moon_update(struct sprite *sprite,double elapsed) {
-  if ((SPRITE->startclock-=elapsed)>0.0) return;
   if ((SPRITE->animclock-=elapsed)<=0.0) {
     SPRITE->animclock+=0.400;
     if (++(SPRITE->animframe)>=2) SPRITE->animframe=0;
   }
-  SPRITE->scroll+=elapsed*SCROLL_RATE;
+  
+  /* When the startclock expires, calculate our scroll rate.
+   * Don't calculate that rate at init, since there might be clock tampering after the sprites spawn.
+   */
+  if (SPRITE->startclock>0.0) {
+    if ((SPRITE->startclock-=elapsed)<=0.0) {
+      double h=SPRITE->texh+DLOG_INNER_H;
+      double remaining=g.time_remaining-1.0; // Finish the chant one second before technical expiry, to allow some room for round-off error, and for aesthetics.
+      if (remaining<=0.0) remaining=0.125;
+      SPRITE->scrollrate=h/remaining;
+    }
+  } else {
+    SPRITE->scroll+=elapsed*SPRITE->scrollrate;
+  }
   
   // Force to the end of the incantation if the global time is up (eg for fast-forward dev runs).
   if (g.time_remaining<=0.0) SPRITE->scroll=SPRITE->texh;
