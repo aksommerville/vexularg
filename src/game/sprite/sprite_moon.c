@@ -78,6 +78,31 @@ static void _moon_update(struct sprite *sprite,double elapsed) {
     SPRITE->scroll+=elapsed*SPRITE->scrollrate;
   }
   
+  /* If Dot is looking at us, not holding anything, and pressing B, speed things up.
+   * That means adjusting time_remaining in addition to our (scroll).
+   */
+  if (g.hero&&(g.input&EGG_BTN_WEST)) {
+    int accelerate=0;
+    double dx=g.hero->x-sprite->x;
+    if (sprite_hero_get_pumpkin(g.hero)) {
+      // Must drop it first.
+    } else if (sprite->xform&EGG_XFORM_XREV) { // We face left. Should always be so, but we'll accomodate both directions.
+      if (!(g.hero->xform&EGG_XFORM_XREV)&&(dx>=-1.5)&&(dx<0.0)) {
+        accelerate=1;
+      }
+    } else {
+      if ((g.hero->xform&EGG_XFORM_XREV)&&(dx>0.0)&&(dx<=1.5)) {
+        accelerate=1;
+      }
+    }
+    if (accelerate) {
+      // It's OK to push time_remaining below zero. See scene_update(); it doesn't look for a crossing.
+      double interval=elapsed*10.000; // Arbitrary acceleration rate (+1 if you want to be rigorous; regular advancement still happens).
+      g.time_remaining-=interval;
+      SPRITE->scroll+=interval*SPRITE->scrollrate;
+    }
+  }
+  
   // Force to the end of the incantation if the global time is up (eg for fast-forward dev runs).
   if (g.time_remaining<=0.0) SPRITE->scroll=SPRITE->texh;
 }

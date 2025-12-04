@@ -325,3 +325,8 @@ void sprite_hero_celebrate(struct sprite *sprite) {
   if (!sprite||(sprite->type!=&sprite_type_hero)) return;
   SPRITE->celebrate=1;
 }
+
+struct sprite *sprite_hero_get_pumpkin(struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_hero)) return 0;
+  return SPRITE->pumpkin;
+}
