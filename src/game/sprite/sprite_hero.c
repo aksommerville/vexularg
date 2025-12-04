@@ -13,7 +13,7 @@
 #define TRAMPOLINE_MIN     5.000 /* m/s */
 #define TRAMPOLINE_RATE    2.000 /* m/s per meter of fall before */
 #define TRAMPOLINE_AUGMENT 2.000 /* Multiplier, if you're holding jump. */
-#define JUMP_LIMIT        30.000 /* m/s, maximum initial jump rate off trampoline. */
+#define JUMP_LIMIT        32.000 /* m/s, maximum initial jump rate off trampoline. */
 #define DOWN_JUMP_CHEAT 0.002 /* m. Amount to fudge on (y) to test and escape oneways downward. Beware! 0.001 is not enough to avoid all rounding errors. */
 
 struct sprite_hero {
@@ -50,6 +50,40 @@ static int _hero_init(struct sprite *sprite) {
   return 0;
 }
 
+/* Find a pumpkin we can pick up.
+ */
+ 
+static struct sprite *hero_find_pumpkin(struct sprite *sprite) {
+  double fx=sprite->x;
+  double fy=sprite->y;
+  if (g.input&EGG_BTN_DOWN) fy+=1.0;
+  else if (sprite->xform) fx-=1.0;
+  else fx+=1.0;
+  double fyupper=fy;
+  if (!(g.input&EGG_BTN_DOWN)) fyupper-=1.0;
+  struct sprite *upper=0;
+  struct sprite **otherp=g.spritev;
+  int i=g.spritec;
+  for (;i-->0;otherp++) {
+    struct sprite *other=*otherp;
+    if (other->defunct) continue;
+    if ( // Do return Moon Song, so we don't make the reject noise when you meant to accelerate her. (it's not perfect)
+      (other->type!=&sprite_type_thing)&&
+      (other->type!=&sprite_type_moon)
+    ) continue;
+    double dx=fx-other->x;
+    if ((dx<-0.5)||(dx>0.5)) continue;
+    double dy=fy-other->y;
+    if ((dy>=-0.5)&&(dy<=0.5)) return other;
+    if (!upper) {
+      dy=fyupper-other->y;
+      if ((dy>=-0.5)&&(dy<=0.5)) upper=other;
+    }
+  }
+  if (upper) fprintf(stderr,"%s:%d: %d caught pumpkin on the second chance\n",__FILE__,__LINE__,g.framec);
+  return upper;
+}
+
 /* If we're carrying something, drop it.
  * Otherwise, if something is in range, pick it up.
  */
@@ -66,30 +100,17 @@ static void hero_pickup_or_drop(struct sprite *sprite) {
     }
     return;
   }
-  double fx=sprite->x;
-  double fy=sprite->y;
-  if (g.input&EGG_BTN_DOWN) fy+=1.0;
-  else if (sprite->xform) fx-=1.0;
-  else fx+=1.0;
-  struct sprite **otherp=g.spritev;
-  int i=g.spritec;
-  for (;i-->0;otherp++) {
-    struct sprite *other=*otherp;
-    if (!other->solid) continue;
-    if (other->defunct) continue;
-    if (other->type!=&sprite_type_thing) continue;
-    double dx=fx-other->x;
-    if ((dx<-0.5)||(dx>0.5)) continue;
-    double dy=fy-other->y;
-    if ((dy<-0.5)||(dy>0.5)) continue;
-    if (!sprite_thing_get_carried(other,sprite)) continue;
-    other->unlist_soon=1;
-    SPRITE->pumpkin=other;
-    SPRITE->pumpkin_role=sprite_thing_get_role(other);
+  struct sprite *pumpkin=hero_find_pumpkin(sprite);
+  if (pumpkin&&(pumpkin->type==&sprite_type_moon)) {
+    // Do nothing. User pressed B to accelerate Moon Song.
+  } else if (sprite_thing_get_carried(pumpkin,sprite)) {
+    pumpkin->unlist_soon=1;
+    SPRITE->pumpkin=pumpkin;
+    SPRITE->pumpkin_role=sprite_thing_get_role(pumpkin);
     sfx_spatial(RID_sound_pickup,sprite->x,sprite->y);
-    return;
+  } else {
+    sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
   }
-  sfx_spatial(RID_sound_reject,sprite->x,sprite->y);
 }
 
 // Drop pumpkin for gameover. Don't require a valid position and don't make a sound.
