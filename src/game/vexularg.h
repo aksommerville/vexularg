@@ -35,8 +35,12 @@ extern struct g {
   // hello modal
   int hello_running;
   double modal_blackout;
+  double hello_clock;
   int texid_title;
   int titlew,titleh;
+  struct { // Texture and bounds for our word bubble, framing included.
+    int texid,x,y,w,h;
+  } hdlog;
   
   /* gameover.
    * At first this was going to be an independent modal, but better to treat it as a state of the scene.
