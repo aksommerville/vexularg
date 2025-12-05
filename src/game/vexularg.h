@@ -16,6 +16,7 @@
 #define SOUND_BLACKOUT_LIMIT 32
 #define CAMLOCK_LIMIT 4 /* There will probably be just one. */
 #define THING_LIMIT 16
+#define PLAY_TIME 180.0
 
 extern struct g {
 
@@ -54,9 +55,12 @@ extern struct g {
   } thingv[THING_LIMIT];
   int thingc;
   double gameover_clock;
-  int score; // Calculated at gameover_begin.
+  int score; // Calculated at gameover_begin. NS_score_*, not the number.
+  int points; // The numeric score for reporting to user. 0..999999
+  int hiscore; // Compare to (points) not (score).
   int texid_judgment; // Vexularg's text at gameover.
   int judgmentw,judgmenth;
+  int texid_score,scorew,scoreh;
   
   const uint8_t *cellv;
   int mapw,maph; // Dimensions are not fixed at build time, tho they could be. Treat them as dynamic.
@@ -71,6 +75,7 @@ extern struct g {
   int thingc_total; // Tabulated during res_init, the largest possible offering.
   double earthquake_time;
   int all_things_in_offeratorium; // thing sprites set this false every update if they're outside.
+  double accelerated_time; // How much time was spent in the final accelerated phase? Compare to game clock, ie 0..180 s.
   
   struct sprite **spritev;
   int spritec,spritea;
@@ -87,6 +92,9 @@ extern struct g {
 void sfx_spatial(int rid,double x,double y); // (x,y) in world meters
 void sfx_full(int rid);
 void song(int rid,int repeat);
+
+void hiscore_load();
+void hiscore_save();
 
 int res_init();
 int res_search(int tid,int rid);

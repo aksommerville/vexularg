@@ -71,7 +71,7 @@ void gameover_begin() {
     thing->sprite=sprite;
     thing->ax=sprite->x;
     thing->ay=sprite->y;
-    thing->zy=roomy+roomh*0.333;
+    thing->zy=roomy+roomh*0.400;
     switch (sprite->rid) {
       case RID_sprite_fish: got_fish=1; break;
       case RID_sprite_marshmallow: got_marshmallow=1; break;
@@ -86,12 +86,46 @@ void gameover_begin() {
   }
   
   /* "Calculate" the final score.
+   * As in, the enum of ending dispositions. Now we're doing a proper score too, that's further down.
    */
   if (!g.thingc) g.score=NS_score_none;
   else if (!got_marshmallow) g.score=NS_score_no_marshmallow;
   else if (!got_fish) g.score=NS_score_no_fish;
   else if (g.thingc<g.thingc_total) g.score=NS_score_ok;
   else g.score=NS_score_perfect;
+  
+  /* Calculate a numeric score under 1M.
+   * All items instantly: 335000-ish. Unpredictable because there's three seconds accelerated, exact amount depends on update timing.
+   * No items: 1
+   * Fish alone: 14780
+   * Minimum valid: 129559
+   * My speed run (finish with around 1:11 left): 724742
+   */
+  const int PARTICIPATION_BONUS=1; // If you finish the game at all, your score will be greater than zero.
+  const int THING_BONUS=14779; // Per thing. It's a prime number in order to shake up the score's lower digits a little.
+  const int VALID_BONUS=100000;
+  const int PERFECT_BONUS=100000;
+  const int TIME_BONUS=1000000; // Scaled by acceleration_time. At best, you can get about 1/4 of this. Only applies when perfect.
+  g.points=0;
+  g.points+=PARTICIPATION_BONUS;
+  g.points+=THING_BONUS*g.thingc;
+  if (g.score>=NS_score_ok) g.points+=VALID_BONUS;
+  if (g.score>=NS_score_perfect) g.points+=PERFECT_BONUS;
+  if (g.score>=NS_score_perfect) g.points+=(int)((g.accelerated_time*TIME_BONUS)/PLAY_TIME);
+  if (g.points>999999) g.points=999999;
+  if (g.points>g.hiscore) {
+    g.hiscore=g.points;
+    hiscore_save();
+  }
+  
+  /* Generate a label with score and hiscore.
+   */
+  if (!g.texid_score) g.texid_score=egg_texture_new();
+  char tmp[32];
+  int tmpc=snprintf(tmp,sizeof(tmp)," Score: %6d\nRecord: %6d",g.points,g.hiscore);
+  if ((tmpc<0)||(tmpc>sizeof(tmp))) tmpc=0;
+  font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,0xffffffff);
+  egg_texture_get_size(&g.scorew,&g.scoreh,g.texid_score);
   
   /* Get Vexularg's judgment.
    */
@@ -244,5 +278,12 @@ void gameover_render() {
     int dsty=(FBH>>1)+20-(g.judgmenth>>1);
     graf_decal(&g.graf,(FBW>>1)-(g.judgmentw>>1),dsty,0,0,g.judgmentw,g.judgmenth);
     graf_set_tint(&g.graf,0);
+  }
+  
+  /* Score and high score, high and centered.
+   */
+  if (g.scorew>0) {
+    graf_set_input(&g.graf,g.texid_score);
+    graf_decal(&g.graf,(FBW>>1)-(g.scorew>>1),13,0,0,g.scorew,g.scoreh);
   }
 }

@@ -24,7 +24,7 @@ int egg_client_init() {
   if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites)<0) return -1;
 
   srand_auto();
-
+  hiscore_load();
   hello_begin();
 
   return 0;
@@ -131,4 +131,38 @@ void song(int rid,int repeat) {
   if (rid==g.song_playing) return;
   g.song_playing=rid;
   egg_play_song(1,rid,repeat,0.5,0.0);
+}
+
+/* High score persistence.
+ */
+ 
+void hiscore_load() {
+  g.hiscore=0;
+  char tmp[6];
+  int tmpc=egg_store_get(tmp,sizeof(tmp),"hiscore",7);
+  if (tmpc!=sizeof(tmp)) return;
+  int i=0;
+  for (;i<tmpc;i++) {
+    char ch=tmp[i];
+    if ((ch<'0')||(ch>'9')) {
+      g.hiscore=0;
+      return;
+    }
+    g.hiscore*=10;
+    g.hiscore+=ch-'0';
+  }
+}
+
+void hiscore_save() {
+  if (g.hiscore<0) g.hiscore=0;
+  else if (g.hiscore>999999) g.hiscore=999999;
+  char tmp[6]={
+    '0'+(g.hiscore/100000)%10,
+    '0'+(g.hiscore/ 10000)%10,
+    '0'+(g.hiscore/  1000)%10,
+    '0'+(g.hiscore/   100)%10,
+    '0'+(g.hiscore/    10)%10,
+    '0'+(g.hiscore       )%10,
+  };
+  egg_store_set("hiscore",7,tmp,sizeof(tmp));
 }

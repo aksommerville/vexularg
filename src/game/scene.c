@@ -36,7 +36,8 @@ int scene_reset() {
   song(RID_song_unto_thee,1);
   
   g.camera_cut=1;
-  g.time_remaining=180.0;
+  g.time_remaining=PLAY_TIME;
+  g.accelerated_time=0.0;
   g.hello_running=0;
   g.gameover_running=0;
   g.earthquake_time=0.0;
@@ -84,6 +85,7 @@ void scene_update(double elapsed) {
   double adjusted_elapsed=elapsed;
   if (g.all_things_in_offeratorium&&!g.gameover_running) {
     adjusted_elapsed*=20.0;
+    if (!g.gameover_running) g.accelerated_time+=adjusted_elapsed;
   }
   g.all_things_in_offeratorium=1;
 

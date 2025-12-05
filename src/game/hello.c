@@ -1,9 +1,9 @@
 #include "vexularg.h"
 
 #define DOTX ((FBW*2)/5)
-#define DOTY (FBH-10)
+#define DOTY (FBH-12)
 #define MOONX ((FBW*3)/5)
-#define MOONY (FBH-10)
+#define MOONY DOTY
 
 #define SCENE_PERIOD 20.0
 
@@ -21,6 +21,17 @@ void hello_begin() {
     g.texid_title=egg_texture_new();
     egg_texture_load_image(g.texid_title,RID_image_title);
     egg_texture_get_size(&g.titlew,&g.titleh,g.texid_title);
+  }
+  
+  g.scorew=0;
+  if (g.hiscore) {
+    if (!g.texid_score) g.texid_score=egg_texture_new();
+    char tmp[32];
+    int tmpc=snprintf(tmp,sizeof(tmp),"High score: %d",g.hiscore);
+    if ((tmpc>0)&&(tmpc<=sizeof(tmp))) {
+      font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,0xffffffff);
+      egg_texture_get_size(&g.scorew,&g.scoreh,g.texid_score);
+    }
   }
   
   song(RID_song_wrath_of_vexularg,1);
@@ -132,9 +143,9 @@ void hello_update(double elapsed) {
   /* Begin dialogue at specific times.
    */
   #define AT(t) ((pvclock<(t))&&(g.hello_clock>=(t)))
-       if (AT( 4.0)) hello_dialogue(DOTX,10); // "Let's summon a ghoul!"
-  else if (AT( 8.0)) hello_dialogue(MOONX,11); // "I'll begin the incantation. You collect an offering."
-  else if (AT(12.0)) hello_dialogue(0,0);
+       if (AT( 2.0)) hello_dialogue(DOTX,10); // "Let's summon a ghoul!"
+  else if (AT( 6.0)) hello_dialogue(MOONX,11); // "I'll begin the incantation. You collect an offering."
+  else if (AT(10.0)) hello_dialogue(0,0);
   #undef AT
 }
 
@@ -145,7 +156,7 @@ void hello_render() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
   
   graf_set_input(&g.graf,g.texid_title);
-  graf_decal(&g.graf,(FBW>>1)-(g.titlew>>1),10,0,0,g.titlew,g.titleh);
+  graf_decal(&g.graf,(FBW>>1)-(g.titlew>>1),7,0,0,g.titlew,g.titleh);
   
   /* Draw both witches near the bottom.
    */
@@ -159,5 +170,11 @@ void hello_render() {
   if (g.hdlog.w>0) {
     graf_set_input(&g.graf,g.hdlog.texid);
     graf_decal(&g.graf,g.hdlog.x,g.hdlog.y,0,0,g.hdlog.w,g.hdlog.h);
+  }
+  
+  // If there's a high-score texture, draw it at the bottom.
+  if (g.scorew) {
+    graf_set_input(&g.graf,g.texid_score);
+    graf_decal(&g.graf,(FBW>>1)-(g.scorew>>1),FBH-g.scoreh,0,0,g.scorew,g.scoreh);
   }
 }
