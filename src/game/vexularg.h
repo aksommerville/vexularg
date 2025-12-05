@@ -76,6 +76,7 @@ extern struct g {
   double earthquake_time;
   int all_things_in_offeratorium; // thing sprites set this false every update if they're outside.
   double accelerated_time; // How much time was spent in the final accelerated phase? Compare to game clock, ie 0..180 s.
+  int texid_stars;
   
   struct sprite **spritev;
   int spritec,spritea;

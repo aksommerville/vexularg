@@ -9,7 +9,7 @@
 #define EGGDEV_ignoreData "" /* Comma-delimited glob patterns for editor to ignore under src/data/ */
 
 #define NS_sys_tilesize 8
-#define NS_sys_bgcolor 0x000000
+#define NS_sys_bgcolor 0x808080
 
 #define CMD_map_image     0x20 /* u16:imageid */
 #define CMD_map_sprite    0x61 /* u16:position, u16:spriteid, u32:arg */

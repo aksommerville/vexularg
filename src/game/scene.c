@@ -157,6 +157,128 @@ static void sort_sprites_partial() {
   }
 }
 
+/* Draw a field of stars, independent of scroll.
+ */
+
+static void stars_init() {
+  uint32_t *rgba=calloc(FBW<<2,FBH);
+  if (!rgba) return;
+  
+  int starc=200; // Will end up placing fewer than this, due to random collisions.
+  while (starc-->0) {
+    // Keep them off the edge, to simplify the neighbor check.
+    int x=1+rand()%(FBW-2);
+    int y=1+rand()%(FBH-2);
+    // If we have a neighbor star, cardinal or diagonal, skip it.
+    uint32_t *p=rgba+y*FBW+x;
+    if (p[-FBW-1]||p[-FBW]||p[-FBW+1]||p[-1]||p[0]||p[1]||p[FBW-1]||p[FBW]||p[FBW+1]) continue;
+    *p=0xffffffff;
+  }
+  
+  // Replace zeroes with opaque black.
+  uint8_t *p=((uint8_t*)rgba)+3;
+  int i=FBW*FBH;
+  for (;i-->0;p+=4) if (!*p) *p=0xff;
+  
+  // Upload pixels.
+  g.texid_stars=egg_texture_new();
+  egg_texture_load_raw(g.texid_stars,FBW,FBH,FBW<<2,rgba,FBW*FBH*4);
+  free(rgba);
+}
+ 
+static void draw_stars() {
+
+  // First update, draw the random star field.
+  if (!g.texid_stars) {
+    stars_init();
+  }
+  
+  // After that, it's just a static image to copy.
+  graf_set_input(&g.graf,g.texid_stars);
+  graf_decal(&g.graf,0,0,0,0,FBW,FBH);
+}
+
+/* Maintain and draw a bunch of decorative snowflakes.
+ */
+ 
+#define SNOWFLAKE_BLINK_PERIOD 4
+#define SNOWFLAKE_BLINK_DUTY 3
+ 
+static double sinev[256];
+ 
+static struct snowflake {
+  double x,y;
+  double dy;
+  double rx;
+  double x0;
+  int p;
+  int blinkp;
+} snowflakev[256];
+
+static int snowflakes_init=0;
+
+static void snowflake_init(struct snowflake *snowflake) {
+  int sinec=sizeof(sinev)/sizeof(double);
+  snowflake->dy=0.100+((0.200*(rand()&0x7fff))/32768.0);
+  snowflake->rx=2.0+((4.0*(rand()&0x7fff))/32768.0);
+  snowflake->p=rand()%sinec;
+  snowflake->blinkp=rand()%SNOWFLAKE_BLINK_PERIOD;
+}
+ 
+static void draw_snow() {
+
+  // Position in the snowfield, driven by camera.
+  int parx=g.camerax>>1;
+  int pary=g.cameray>>1;
+
+  // First update, calculate the sine table and initialize a set of snowflakes.
+  if (!snowflakes_init) {
+    snowflakes_init=1;
+    int sinec=sizeof(sinev)/sizeof(double);
+    int i=0;
+    double t=0.0;
+    double dt=(M_PI*2.0)/sinec;
+    for (;i<sinec;i++,t+=dt) sinev[i]=sin(t);
+    struct snowflake *snowflake=snowflakev;
+    int snowflakec=sizeof(snowflakev)/sizeof(struct snowflake);
+    for (i=snowflakec;i-->0;snowflake++) {
+      snowflake_init(snowflake);
+      snowflake->x=parx+rand()%FBW;
+      snowflake->y=pary+rand()%FBH;
+    }
+  }
+  
+  graf_set_input(&g.graf,g.texid_terrain);
+  int sinec=sizeof(sinev)/sizeof(double);
+  struct snowflake *snowflake=snowflakev;
+  int i=sizeof(snowflakev)/sizeof(struct snowflake);
+  for (;i-->0;snowflake++) {
+    if (++(snowflake->blinkp)>=SNOWFLAKE_BLINK_PERIOD) snowflake->blinkp=0;
+    snowflake->y+=snowflake->dy;
+    snowflake->p++;
+    if (snowflake->p>=sinec) snowflake->p=0;
+    if (snowflake->blinkp<SNOWFLAKE_BLINK_DUTY) {
+      double x=snowflake->x+snowflake->rx*sinev[snowflake->p];
+      int ix=(int)x-parx;
+      int iy=(int)snowflake->y-pary;
+      // If we're outside the visible range on either axis, reinit and move to the other edge.
+      if ((ix<0)||(ix>=FBW)) {
+        snowflake_init(snowflake);
+        if (ix<0) snowflake->x=parx+FBW-1;
+        else snowflake->x=parx;
+        ix=(int)(snowflake->x+snowflake->rx*sinev[snowflake->p])-parx;
+      }
+      if ((iy<0)||(iy>=FBH)) {
+        snowflake_init(snowflake);
+        if (iy<0) snowflake->y=pary+FBH-1;
+        else snowflake->y=pary;
+        iy=(int)snowflake->y-pary;
+      }
+      graf_tile(&g.graf,ix,iy,0x07,0);
+    }
+  }
+}
+
 /* Render.
  */
  
@@ -211,8 +333,11 @@ void scene_render() {
     }
   }
 
-  //TODO I'd like to make some terrain tiles transparent and draw animated parallax layers behind. Decorative, not urgent.
-  // For now, we may assume that the terrain tiles are opaque.
+  /* Draw the far parallax background.
+   */
+  //graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff); // No need to blackout; the stars image is opaque.
+  draw_stars();
+  draw_snow();
   
   /* Fill framebuffer with the grid.
    */
