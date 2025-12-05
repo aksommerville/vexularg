@@ -130,7 +130,7 @@ void sfx_full(int rid) {
 void song(int rid,int repeat) {
   if (rid==g.song_playing) return;
   g.song_playing=rid;
-  egg_play_song(1,rid,repeat,0.5,0.0);
+  egg_play_song(1,rid,repeat,0.400,0.0);
 }
 
 /* High score persistence.

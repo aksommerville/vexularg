@@ -30,7 +30,7 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 - [ ] Reconsider hazards. We'll have plenty of time for dev, and it could add some interesting play.
 - [ ] Moving platforms?
 - [x] Parallax background. Rain and clouds and such, that you see thru windows. Entirely decorative.
-- [ ] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
+- [x] Sound effects. ...defer until the weekend, so I can have the MIDI rig on hand.
 - [x] Scorekeeping. We could track Moon's false time and add that to the things score, to make speed count.
 - [ ] Itch page.
 

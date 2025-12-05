@@ -268,7 +268,7 @@ static void _hero_update(struct sprite *sprite,double elapsed) {
         if (SPRITE->jumppower>JUMP_LIMIT) {
           SPRITE->jumppower=JUMP_LIMIT;
         }
-        if (SPRITE->jumppower>=1.0) sfx_spatial(RID_sound_trampoline_big,sprite->collcause->x,sprite->collcause->y);
+        if (SPRITE->jumppower>=15.0) sfx_spatial(RID_sound_trampoline_big,sprite->collcause->x,sprite->collcause->y);
         else sfx_spatial(RID_sound_trampoline_lil,sprite->collcause->x,sprite->collcause->y);
         sprite_thing_animate_trampoline(sprite->collcause);
         SPRITE->falling=-1;

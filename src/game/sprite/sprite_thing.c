@@ -12,6 +12,7 @@ struct sprite_thing {
   double ratelimit; // Clock that runs when fan or magnet strikes nothing, so we don't spin too much wheel.
   int qx,qy; // Quantized position.
   int in_offeratorium;
+  int falling;
 };
 
 #define SPRITE ((struct sprite_thing*)sprite)
@@ -215,7 +216,12 @@ static void _thing_update(struct sprite *sprite,double elapsed) {
    * Unlike the hero, our gravity is constant.
    */
   } else if (SPRITE->role!=NS_role_balloon) {
-    sprite_move(sprite,0.0,GRAVITY*elapsed);
+    if (sprite_move(sprite,0.0,GRAVITY*elapsed)) {
+      SPRITE->falling=1;
+    } else if (SPRITE->falling) { // Hit ground.
+      SPRITE->falling=0;
+      sfx_spatial(RID_sound_land_soft,sprite->x,sprite->y);
+    }
   }
 }
 
