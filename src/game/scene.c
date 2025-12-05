@@ -28,7 +28,6 @@ int scene_reset() {
           uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
           struct sprite *sprite=sprite_spawn(0,x,y,arg,rid,0,0);
         } break;
-      //TODO Other map initialization commands.
     }
   }
   
@@ -164,6 +163,8 @@ static void stars_init() {
   uint32_t *rgba=calloc(FBW<<2,FBH);
   if (!rgba) return;
   
+  uint32_t starcolor=g.enable_color?0xffc06030:0xffffffff;
+  
   int starc=200; // Will end up placing fewer than this, due to random collisions.
   while (starc-->0) {
     // Keep them off the edge, to simplify the neighbor check.
@@ -172,13 +173,19 @@ static void stars_init() {
     // If we have a neighbor star, cardinal or diagonal, skip it.
     uint32_t *p=rgba+y*FBW+x;
     if (p[-FBW-1]||p[-FBW]||p[-FBW+1]||p[-1]||p[0]||p[1]||p[FBW-1]||p[FBW]||p[FBW+1]) continue;
-    *p=0xffffffff;
+    *p=starcolor;
   }
   
   // Replace zeroes with opaque black.
-  uint8_t *p=((uint8_t*)rgba)+3;
-  int i=FBW*FBH;
-  for (;i-->0;p+=4) if (!*p) *p=0xff;
+  if (g.enable_color) {
+    uint32_t *p=rgba;
+    int i=FBW*FBH;
+    for (;i-->0;p++) if (!*p) *p=0xff402010;
+  } else {
+    uint8_t *p=((uint8_t*)rgba)+3;
+    int i=FBW*FBH;
+    for (;i-->0;p+=4) if (!*p) *p=0xff;
+  }
   
   // Upload pixels.
   g.texid_stars=egg_texture_new();
@@ -407,6 +414,7 @@ void scene_render() {
     graf_tile(&g.graf,FBW-3,4,0x70+sec%10,0);
     graf_tile(&g.graf,FBW-7,4,0x70+sec/10,0);
     if (!ms||(ms>=200)) graf_tile(&g.graf,FBW-10,4,0x7a,0);
+    else if (g.enable_color) graf_tile(&g.graf,FBW-10,4,0x68,0);
     graf_tile(&g.graf,FBW-13,4,0x70+min,0);
   
     /* Extra blinking "Hurry!" message when time is short.

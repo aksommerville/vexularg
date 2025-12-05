@@ -10,6 +10,8 @@ void egg_client_quit(int status) {
 
 int egg_client_init() {
 
+  g.enable_color=0; // TODO Should this be user-selectable? Need to wait until B1T JAM is over before enabling at least.
+
   int fbw=0,fbh=0;
   egg_texture_get_size(&fbw,&fbh,1);
   if ((fbw!=FBW)||(fbh!=FBH)) {
@@ -20,8 +22,13 @@ int egg_client_init() {
   if (res_init()<0) return -1;
   if (!(g.font=font_new())) return -1;
   if (font_add_image(g.font,RID_image_font,0x0020)) return -1;
-  if (egg_texture_load_image(g.texid_terrain=egg_texture_new(),RID_image_terrain)<0) return -1;
-  if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites)<0) return -1;
+  if (g.enable_color) {
+    if (egg_texture_load_image(g.texid_terrain=egg_texture_new(),RID_image_terrain_color)<0) return -1;
+    if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites_color)<0) return -1;
+  } else {
+    if (egg_texture_load_image(g.texid_terrain=egg_texture_new(),RID_image_terrain)<0) return -1;
+    if (egg_texture_load_image(g.texid_sprites=egg_texture_new(),RID_image_sprites)<0) return -1;
+  }
 
   srand_auto();
   hiscore_load();

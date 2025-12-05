@@ -29,6 +29,7 @@ extern struct g {
   struct font *font;
   int texid_terrain;
   int texid_sprites;
+  int enable_color; // Must be set during startup.
   
   int input,pvinput;
   int framec;

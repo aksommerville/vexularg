@@ -29,7 +29,8 @@ void hello_begin() {
     char tmp[32];
     int tmpc=snprintf(tmp,sizeof(tmp),"High score: %d",g.hiscore);
     if ((tmpc>0)&&(tmpc<=sizeof(tmp))) {
-      font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,0xffffffff);
+      uint32_t color=g.enable_color?0x808080ff:0xffffffff;
+      font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,color);
       egg_texture_get_size(&g.scorew,&g.scoreh,g.texid_score);
     }
   }
@@ -156,15 +157,19 @@ void hello_render() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
   
   graf_set_input(&g.graf,g.texid_title);
+  if (g.enable_color) {
+    /*if ((g.hello_clock>=1.000)&&(g.hello_clock<1.250))*/ graf_set_tint(&g.graf,0xff0000ff);
+  }
   graf_decal(&g.graf,(FBW>>1)-(g.titlew>>1),7,0,0,g.titlew,g.titleh);
+  graf_set_tint(&g.graf,0);
   
   /* Draw both witches near the bottom.
    */
   graf_set_input(&g.graf,g.texid_sprites);
   graf_tile(&g.graf,DOTX,DOTY,0x10,0);
   graf_tile(&g.graf,DOTX,DOTY-NS_sys_tilesize,0x00,0);
-  graf_tile(&g.graf,MOONX,MOONY,0x10,EGG_XFORM_XREV);
-  graf_tile(&g.graf,MOONX,MOONY-NS_sys_tilesize,0x00,EGG_XFORM_XREV);
+  graf_tile(&g.graf,MOONX,MOONY,0x18,EGG_XFORM_XREV);
+  graf_tile(&g.graf,MOONX,MOONY-NS_sys_tilesize,0x08,EGG_XFORM_XREV);
   
   // And a word bubble if we have one.
   if (g.hdlog.w>0) {

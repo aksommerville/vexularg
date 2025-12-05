@@ -34,7 +34,7 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 ## Post-Jam
 
 - [ ] Enable menu.
-- [ ] Color graphics?
+- [ ] Color graphics? Drawn and they look great. Set `g.enable_color` during startup. Should we add a menu option or something? Or just go color-only after the jam?
 
 ## Notes for the player
 

@@ -124,7 +124,7 @@ void gameover_begin() {
   char tmp[32];
   int tmpc=snprintf(tmp,sizeof(tmp)," Score: %6d\nRecord: %6d",g.points,g.hiscore);
   if ((tmpc<0)||(tmpc>sizeof(tmp))) tmpc=0;
-  font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,0xffffffff);
+  font_render_to_texture(g.texid_score,g.font,tmp,tmpc,FBW,FBH,g.enable_color?0x000000ff:0xffffffff);
   egg_texture_get_size(&g.scorew,&g.scoreh,g.texid_score);
   
   /* Get Vexularg's judgment.
@@ -247,7 +247,9 @@ void gameover_render() {
       double ny=(cos(sweept*M_PI*2.0)-1.0)/2.0;
       if (sweep_dir>0) ny=-ny;
       int dx=(int)(nx*10.0); // horizontal radius
+      if (dx<-8) dx=-8; else if (dx>8) dx=8;
       int dy=(int)(ny* 4.0); // vertical radius
+      if (dy<-2) dy=-2; else if (dy>2) dy=2;
       lballx+=dx;
       lbally+=dy;
       rballx+=dx;
@@ -274,7 +276,7 @@ void gameover_render() {
    */
   if (g.gameover_clock>=msg_start_time) {
     graf_set_input(&g.graf,g.texid_judgment);
-    graf_set_tint(&g.graf,0xffffffff);
+    graf_set_tint(&g.graf,g.enable_color?0x000000ff:0xffffffff);
     int dsty=(FBH>>1)+20-(g.judgmenth>>1);
     graf_decal(&g.graf,(FBW>>1)-(g.judgmentw>>1),dsty,0,0,g.judgmentw,g.judgmenth);
     graf_set_tint(&g.graf,0);
