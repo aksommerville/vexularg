@@ -29,7 +29,7 @@ https://www.google.com/search?q=vexularg => 0 results! I guess we'll own it :)
 
 - [ ] Reconsider hazards. We'll have plenty of time for dev, and it could add some interesting play.
 - [ ] Moving platforms?
-- [ ] Background and solids graphic detail, decorative.
+- [x] Background and solids graphic detail, decorative.
 
 ## Post-Jam
 
